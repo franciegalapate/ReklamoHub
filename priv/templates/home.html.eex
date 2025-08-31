@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Complaint</title>
+</head>
+<body>
+  <h1>New Complaint</h1>
+  <form action="/submit" method="POST">
+    <label>User:</label><br>
+    <input type="text" name="user"><br><br>
+    <label>Message:</label><br>
+    <textarea name="message"></textarea><br><br>
+    <button type="submit">Submit</button>
+  </form>
+  <a href="/">Back to list</a>
+</body>
+</html>
