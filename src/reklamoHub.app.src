@@ -1,0 +1,10 @@
+{application, reklamoHub,
+    [
+        {description, "ReklamoHub Minimal App"},
+        {vsn, "0.1.0"},
+        {modules, [reklamoHub_app, reklamoHub_handler]},
+        {registered, []},
+        {applications, [kernel, stdlib, cowboy]},
+        {mod, {reklamoHub_app, []}},  %% <-- must match App module
+        {env, []}
+    ]}.
