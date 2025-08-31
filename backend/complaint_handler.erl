@@ -1,0 +1,1 @@
+% Resident complaints (submit/view) || Handles resident complaint submission
