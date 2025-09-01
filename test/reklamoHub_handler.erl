@@ -14,8 +14,8 @@
 init(Req0, State) ->
   %% Sample dynamic data
   Complaints = [
-    #{user => <<"Alice">>, message => <<"App crashed">>},
-    #{user => <<"Bob">>,   message => <<"Login failed">>}
+    #{user => <<"Alice">>, message => <<"complaint>},
+    #{user => <<"Bob">>,   message => <<"complaint">>}
   ],
 
   %% Build HTML as iolist

@@ -176,3 +176,237 @@ body{
   border-radius: 12px;
   z-index: -1;
 }
+
+
+
+
+/* officer_dashboard.html */
+
+.frame_dashboard{
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+    display:flex;
+    flex-direction:column;
+    min-height: 100vh;
+}
+
+/* Header */
+
+.brand { 
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding-bottom: 20px;
+}
+
+.logo-img { 
+    display:block;
+    height:50px;
+    width:auto; 
+    border-radius: 50%;
+}
+
+
+.subtitle {
+    margin: 8px auto 0;
+    font-weight: 400;
+    opacity: .95;
+    max-width: 800px;
+    font-size: 15px;
+    color: var(--muted);
+}
+
+/* Card */
+.card_dashboard{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+    padding: 30px 40px;
+    width: 100%;
+    display: block;
+    margin-top: 20px;
+}
+
+/* Table styles */
+.complaints-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.complaints-table th, .complaints-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.complaints-table thead th {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.complaints-table tbody td {
+    font-size: 14px;
+    color: var(--ink);
+    vertical-align: top;
+}
+
+.status-select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.status-resolved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-ongoing {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-pending {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.view-details-btn {
+    color: var(--secondary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.photo-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* Modal Styles */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s linear;
+}
+.modal-backdrop.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--card);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.modal-details h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.modal-details p {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.modal-details strong {
+    font-weight: 600;
+}
+.modal-details img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: #c0002b;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+.navbar .left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.navbar .right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-container label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+}
