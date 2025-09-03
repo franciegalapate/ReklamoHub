@@ -202,9 +202,9 @@ body{
     padding-bottom: 20px;
 }
 
-.logo-img { 
+.logo-img_nav { 
     display:block;
-    height:50px;
+    height:70px;
     width:auto; 
     border-radius: 50%;
 }
