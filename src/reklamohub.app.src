@@ -1,1 +1,17 @@
 % OTP app config
+
+{application, reklamohub,
+ [
+  {description, "ReklamoHub"},
+  {vsn, "1.0"},
+  {modules, [
+      reklamohub_app,
+      reklamohub_sup,
+      reklamohub_router,
+      complaint_handler,
+      officer_handler,
+      reklamo_hub
+  ]},
+  {applications, [kernel, stdlib, cowboy]},
+  {mod, {reklamohub_app, []}}
+ ]}.
