@@ -1,6 +1,8 @@
 % Resident complaints (submit/view) || Handles resident complaint submission
 % Demo code only, PLEASE REPLACE
 
+%
+
 -module(complaint_handler).
 -behaviour(cowboy_handler).
 
