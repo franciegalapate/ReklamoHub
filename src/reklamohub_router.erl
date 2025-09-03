@@ -7,26 +7,20 @@
 
 init(Req0, State) ->
     Path = binary_to_list(cowboy_req:path(Req0)),
-
-    %% Debug log
     io:format("👉 Requested path: ~s~n", [Path]),
 
     File = resolve_file(Path),
-
-    %% Debug log
     io:format("📂 Resolved to file: ~s~n", [File]),
 
     case file:read_file(File) of
         {ok, Bin} ->
             Mime = mime_type(File),
-            %% Debug log
             io:format("✅ Served file: ~s (MIME: ~s)~n", [File, binary_to_list(Mime)]),
             Req = cowboy_req:reply(200,
                     #{<<"content-type">> => Mime}, Bin, Req0),
             {ok, Req, State};
 
         {error, Reason} ->
-            %% Debug log
             io:format("❌ Could not read file: ~s (Reason: ~p)~n", [File, Reason]),
             Req = cowboy_req:reply(404,
                     #{<<"content-type">> => <<"text/plain">>},
