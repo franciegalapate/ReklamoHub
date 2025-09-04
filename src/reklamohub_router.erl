@@ -7,15 +7,11 @@
 
 init(Req0, State) ->
     Path = binary_to_list(cowboy_req:path(Req0)),
-    io:format("👉 Requested path: ~s~n", [Path]),
-
     File = resolve_file(Path),
-    io:format("📂 Resolved to file: ~s~n", [File]),
 
     case file:read_file(File) of
         {ok, Bin} ->
             Mime = mime_type(File),
-            io:format("✅ Served file: ~s (MIME: ~s)~n", [File, binary_to_list(Mime)]),
             Req = cowboy_req:reply(200,
                     #{<<"content-type">> => Mime}, Bin, Req0),
             {ok, Req, State};
