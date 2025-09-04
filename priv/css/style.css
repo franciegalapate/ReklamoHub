@@ -84,6 +84,12 @@ body{
     width:auto; 
 }
 
+.login-btn-container{
+position:absolute;
+top: 20px;
+right: 20px
+}
+
 .hero h1 {
   margin: 0;
   font-size: 32px;
@@ -269,14 +275,18 @@ body{
     color: #155724;
 }
 
-.status-ongoing {
+.status-in-progress {
     background-color: #fff3cd;
     color: #856404;
 }
 
-.status-pending {
+.status-rejected {
     background-color: #f8d7da;
     color: #721c24;
+}
+.status-submitted {
+    background-color: #d7e2f8;
+    color: #3e1c72;
 }
 
 .view-details-btn {

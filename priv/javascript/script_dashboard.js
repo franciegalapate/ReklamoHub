@@ -7,7 +7,7 @@ let complaints = [
         category: 'Ingay (Noise)',
         details: 'Maingay na videoke mula sa kapitbahay gabi-gabi. Nakakaabala sa pagtulog ng pamilya.',
         photoUrl: '../assets/logo/logo_subtitle.png',
-        status: 'Pending'
+        status: 'In Progress'
     },
     {
         id: 'c2',
@@ -16,7 +16,7 @@ let complaints = [
         category: 'Basura (Garbage)',
         details: 'Illegal dumping ng basura sa kanto malapit sa kalsada. Amoy at nag-aakit ng mga peste.',
         photoUrl: '',
-        status: 'Ongoing'
+        status: 'Submitted'
     },
     {
         id: 'c3',
@@ -78,6 +78,7 @@ const renderTable = async () => {
 
     filteredComplaints.forEach(complaint => {
         const tr = document.createElement('tr');
+        const statusClass = complaint.status.toLowerCase().replace(/\s/g, '-');
         tr.innerHTML = `
             <td>${complaint.name || 'Anonymous'}</td>
             <td>${complaint.address}</td>
@@ -87,10 +88,11 @@ const renderTable = async () => {
                 ${complaint.photoUrl ? `<img src="${complaint.photoUrl}" alt="Photo" class="photo-thumbnail">` : '—'}
             </td>
             <td>
-                <select class="status-select status-${complaint.status.toLowerCase()}" data-id="${complaint.id}">
-                    <option value="Pending" ${complaint.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Ongoing" ${complaint.status === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
+                <select class="status-select status-${statusClass}" data-id="${complaint.id}">
+                    <option value="Submitted" ${complaint.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+                    <option value="In Progress" ${complaint.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
                     <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                    <option value="Rejected" ${complaint.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
                 </select>
             </td>
             <td>
@@ -100,6 +102,93 @@ const renderTable = async () => {
         complaintsTableBody.appendChild(tr);
     });
 };
+
+// ----Change status color -------
+// Function to update the status in the UI
+const updateStatusColor = (selectElement) => {
+    const newStatus = selectElement.value;
+    // Remove all existing status classes
+    selectElement.classList.remove(
+        'status-submitted',
+        'status-in-progress',
+        'status-resolved',
+        'status-rejected'
+    );
+    // Add the new status class based on the selected value
+    const statusClass = newStatus.toLowerCase().replace(/\s/g, '-');
+    selectElement.classList.add(`status-${statusClass}`);
+};
+
+// --- Event Listeners ---
+document.addEventListener('DOMContentLoaded', renderTable);
+
+// Handle filter change
+statusFilter.addEventListener('change', (e) => {
+    currentFilter = e.target.value;
+    renderTable();
+});
+
+// Handle status change
+complaintsTableBody.addEventListener('change', (e) => {
+    if (e.target.classList.contains('status-select')) {
+        const id = e.target.dataset.id;
+        const newStatus = e.target.value;
+        // Find the complaint in the dummy data and update its status
+        const complaint = complaints.find(c => c.id === id);
+        if (complaint) {
+            complaint.status = newStatus;
+        }
+
+        // Call the function to update the UI color
+        updateStatusColor(e.target);
+
+        // Simulate a backend update (this part is already there)
+        updateComplaintStatusInBackend(id, newStatus);
+    }
+});
+
+// Handle view details button click (This remains the same)
+complaintsTableBody.addEventListener('click', (e) => {
+    if (e.target.classList.contains('view-details-btn')) {
+        e.preventDefault();
+        const id = e.target.dataset.id;
+        const complaint = complaints.find(c => c.id === id);
+        if (complaint) {
+            modalName.textContent = complaint.name || 'Anonymous';
+            modalAddress.textContent = complaint.address;
+            modalCategory.textContent = complaint.category;
+            modalDescription.textContent = complaint.details;
+            
+            if (complaint.photoUrl) {
+                modalPhoto.src = complaint.photoUrl;
+                modalPhoto.alt = 'Complaint photo';
+                modalPhotoContainer.style.display = 'block';
+            } else {
+                modalPhotoContainer.style.display = 'none';
+            }
+
+            modalBackdrop.classList.add('visible');
+        }
+    }
+});
+
+// Handle modal close
+closeModalBtn.addEventListener('click', () => {
+    modalBackdrop.classList.remove('visible');
+});
+
+modalBackdrop.addEventListener('click', (e) => {
+    if (e.target.id === 'modal-backdrop') {
+        modalBackdrop.classList.remove('visible');
+    }
+});
+
+// Handle logout
+logoutBtn.addEventListener('click', () => {
+});
+
+
+
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', renderTable);
