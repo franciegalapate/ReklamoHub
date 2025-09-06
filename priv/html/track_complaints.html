@@ -1,1 +1,69 @@
 <!-- Page for residents to track their complaints -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Complaint</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <div class="frame">
+    <header class="hero">
+      <div class="brand">
+        <img src="../assets/logo/logo_subtitle.png" alt="Logo" class="logo-img" />
+        <h1>Track Your Complaint</h1>
+      </div>
+      <p class="subtitle">
+        Enter your complaint tracking ID to check the current status of your request.
+      </p>
+    </header>
+
+    <main class="card">
+      <form class="form" id="trackForm" novalidate>
+        <div class="field">
+          <label for="trackingId">Tracking ID <span class="required">*</span></label>
+          <input 
+            id="trackingId" 
+            name="trackingId" 
+            type="text" 
+            placeholder="e.g. CMP-0005" 
+            required />
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Check Status</button>
+        </div>
+      </form>
+
+      <div id="result" style="margin-top:20px; text-align:center; display:none;">
+        <!-- Status will be displayed here -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Dummy demo: Replace with actual API call later DELETE!
+    document.getElementById("trackForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const id = document.getElementById("trackingId").value.trim();
+      const resultDiv = document.getElementById("result");
+
+      if (!id) {
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = "<p style='color:red;'>❌ Please enter a tracking ID.</p>";
+        return;
+      }
+
+      // Fake lookup
+      if (id === "CMP-0005") {
+        resultDiv.innerHTML = "<p>✅ Complaint <strong>CMP-0005</strong> is currently <strong>Submitted</strong>.</p>";
+      } else {
+        resultDiv.innerHTML = "<p>⚠️ No record found for <strong>" + id + "</strong>.</p>";
+      }
+      resultDiv.style.display = "block";
+    });
+  </script>
+</body>
+</html>
