@@ -1,5 +1,5 @@
 -module(db_manager).
--export([start/0, stop/0, query/2, query/3]).
+-export([start/0, stop/0, query/1, query/2]).
 
 start() ->
     PoolId = db_config:get_pool_id(),

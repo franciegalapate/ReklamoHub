@@ -1,1 +1,45 @@
 <!-- Login page for admin -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="frame">
+    <header class="hero">
+      <div class="brand">
+        <img src="/assets/logo/logo_subtitle.png" alt="Logo" class="logo-img" />
+        <h1>Admin Login</h1>
+      </div>
+      <p class="subtitle">
+        Please sign in to access the admin dashboard and manage complaints.
+      </p>
+    </header>
+
+    <main class="card">
+      <form class="form" action="#" method="post" novalidate>
+        <div class="field">
+          <label for="username">Username <span class="required">*</span></label>
+          <input id="username" name="username" type="text" placeholder="Enter your username" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Password <span class="required">*</span></label>
+          <input id="password" name="password" type="password" placeholder="Enter your password" required />
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- Optional: external JS if you want form validation -->
+  <script src="/javascript/script.js"></script>
+</body>
+</html>
