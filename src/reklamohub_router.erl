@@ -6,21 +6,43 @@
 -export([init/2]).
 
 init(Req0, State) ->
+    Path = cowboy_req:path(Req0),
+
+    case Path of
+        %% API endpoints
+        <<"/admin_login">> ->
+            admin_handler:init(Req0, State);
+
+        <<"/admin_dashboard">> ->
+            admin_handler:init(Req0, State);
+
+        <<"/update_status">> ->
+            admin_handler:init(Req0, State);
+
+        <<"/submit_complaint">> ->
+            complaint_handler:init(Req0, State);
+
+        <<"/track_complaint">> ->
+            complaint_handler:init(Req0, State);
+
+        %% Otherwise → serve static files
+        _ ->
+            serve_static(Req0, State)
+    end.
+
+serve_static(Req0, State) ->
     Path = binary_to_list(cowboy_req:path(Req0)),
     File = resolve_file(Path),
-
     case file:read_file(File) of
         {ok, Bin} ->
             Mime = mime_type(File),
             Req = cowboy_req:reply(200,
-                    #{<<"content-type">> => Mime}, Bin, Req0),
+                #{<<"content-type">> => Mime}, Bin, Req0),
             {ok, Req, State};
-
-        {error, Reason} ->
-            io:format("❌ Could not read file: ~s (Reason: ~p)~n", [File, Reason]),
+        {error, _Reason} ->
             Req = cowboy_req:reply(404,
-                    #{<<"content-type">> => <<"text/plain">>},
-                    <<"Not found">>, Req0),
+                #{<<"content-type">> => <<"text/plain">>},
+                <<"Not found">>, Req0),
             {ok, Req, State}
     end.
 

@@ -10,13 +10,18 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    io:format("~n🚀 ReklamoHub starting...~n"),
-    io:format("🌐 Cowboy will listen on http://localhost:8080~n~n"),
+    io:format("~nReklamoHub starting...~n"),
 
     Dispatch = cowboy_router:compile([
         {'_', [
-            {"/api/complaints", complaint_handler, []},
-            {"/api/officers", officer_handler, []},
+            %% API routes
+            {"/submit_complaint", complaint_handler, []},
+            {"/track_complaint", complaint_handler, []},
+            {"/admin_login", admin_handler, []},
+            {"/admin_dashboard", admin_handler, []},
+            {"/update_status", admin_handler, []},
+
+            %% Static files (fallback)
             {"/[...]", reklamohub_router, []}
         ]}
     ]),

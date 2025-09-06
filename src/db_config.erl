@@ -1,3 +1,5 @@
+% Stores connection info (pool name, host, port, user, etc.).
+
 -module(db_config).
 -export([get_pool_id/0, get_db_config/0]).
 

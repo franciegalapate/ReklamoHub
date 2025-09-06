@@ -1,33 +1,15 @@
-// dummy data to be replaced by Erlang backend
-let complaints = [
-    {
-        id: 'c1',
-        name: 'Lyshael Bernal',
-        address: '123 Tiptop, Ambuklao Road, Baguio City',
-        category: 'Ingay (Noise)',
-        details: 'Maingay na videoke mula sa kapitbahay gabi-gabi. Nakakaabala sa pagtulog ng pamilya.',
-        photoUrl: '../assets/logo/logo_subtitle.png',
-        status: 'In Progress'
-    },
-    {
-        id: 'c2',
-        name: 'Andrei Dela Cruz',
-        address: 'Purok 5, Brgy. Irisan, Baguio City',
-        category: 'Basura (Garbage)',
-        details: 'Illegal dumping ng basura sa kanto malapit sa kalsada. Amoy at nag-aakit ng mga peste.',
-        photoUrl: '',
-        status: 'Submitted'
-    },
-    {
-        id: 'c3',
-        name: 'Anonymous',
-        address: 'Tuba Road, Brgy. Camp 7, Baguio City',
-        category: 'Kakulangan (Lack of Services)',
-        details: 'Ang mga ilaw sa kalsada sa aming lugar ay patay na sa mahigit isang linggo, delikado kapag gabi.',
-        photoUrl: '../assets/logo/logo_subtitle.png',
-        status: 'Resolved'
-    },
-];
+const fetchComplaintsFromBackend = async () => {
+    const res = await fetch("/admin_dashboard");
+    return res.ok ? await res.json() : [];
+};
+
+const updateComplaintStatusInBackend = async (id, newStatus) => {
+    await fetch("/update_status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ complaint_id: id, status: newStatus })
+    });
+};
 
 // --- DOM Elements ---
 const complaintsTableBody = document.getElementById('complaints-table-body');
