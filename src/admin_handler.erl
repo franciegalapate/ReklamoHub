@@ -6,6 +6,7 @@ init(Req0, State) ->
     Method = cowboy_req:method(Req0),
     Path   = cowboy_req:path(Req0),
     case {Method, Path} of
+        %% --------- LOGIN PAGE ----------
         {<<"GET">>, <<"/admin_login">>} ->
             case file:read_file("priv/html/admin_login.html") of
                 {ok, Html} ->
@@ -14,10 +15,13 @@ init(Req0, State) ->
                     {ok, Req, State};
                 {error, Reason} ->
                     io:format("Error reading admin_login.html: ~p~n", [Reason]),
-                    Req = cowboy_req:reply(500, #{<<"content-type">> => <<"text/plain">>}, <<"Internal Server Error: Missing file.">>, Req0),
+                    Req = cowboy_req:reply(500,
+                        #{<<"content-type">> => <<"text/plain">>},
+                        <<"Internal Server Error: Missing file.">>, Req0),
                     {ok, Req, State}
             end;
 
+        %% --------- LOGIN SUBMIT ----------
         {<<"POST">>, <<"/admin_login">>} ->
             {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
             Params   = cow_qs:parse_qs(BodyBin),
@@ -39,6 +43,7 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
+        %% --------- DASHBOARD HTML ----------
         {<<"GET">>, <<"/admin_dashboard">>} ->
             Cookies = cowboy_req:parse_cookies(Req0),
             case lists:keyfind(<<"admin">>, 1, Cookies) of
@@ -50,7 +55,9 @@ init(Req0, State) ->
                             {ok, Req, State};
                         {error, Reason} ->
                             io:format("Error reading admin_dashboard.html: ~p~n", [Reason]),
-                            Req = cowboy_req:reply(500, #{<<"content-type">> => <<"text/plain">>}, <<"Internal Server Error: Missing file.">>, Req0),
+                            Req = cowboy_req:reply(500,
+                                #{<<"content-type">> => <<"text/plain">>},
+                                <<"Internal Server Error: Missing file.">>, Req0),
                             {ok, Req, State}
                     end;
                 _ ->
@@ -59,11 +66,28 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
+        %% --------- DASHBOARD DATA API ----------
+        {<<"GET">>, <<"/api/complaints">>} ->
+            case reklamohub_db:get_all_complaints() of
+                {ok, #{columns := Cols, rows := Rows}} ->
+                    JsonRows = [maps:from_list(lists:zip(Cols, Row)) || Row <- Rows],
+                    Json = jsx:encode(JsonRows),
+                    Req = cowboy_req:reply(200,
+                            #{<<"content-type">> => <<"application/json">>},
+                            Json, Req0),
+                    {ok, Req, State};
+                _ ->
+                    Req = cowboy_req:reply(500,
+                            #{<<"content-type">> => <<"application/json">>},
+                            <<"{\"error\":\"Database error\"}">>, Req0),
+                    {ok, Req, State}
+            end;
+
         _ ->
             {ok, Req0, State}
     end.
 
-%% Helpers
+%% ---------- Helpers ----------
 
 qs(Key, Params) ->
     case lists:keyfind(Key, 1, Params) of

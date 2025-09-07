@@ -24,6 +24,7 @@ init([]) ->
             {"/admin_login", admin_handler, []},
             {"/admin_dashboard", admin_handler, []},
             {"/update_status", admin_handler, []},
+            {"/api/complaints", admin_handler, []},
             {"/[...]", reklamohub_router, []}
         ]}
     ]),
