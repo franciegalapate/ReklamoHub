@@ -1,22 +1,14 @@
 % DB queries (insert, list, update)
-% DUMMY CODE
 
 -module(reklamohub_db).
--export([insert_complaint/1, list_complaints/0, update_complaint/2]).
+-export([save_complaint/5, get_complaint_by_id/1]).
 
-%% Insert a complaint (dummy for now)
-insert_complaint(Complaint) ->
-    io:format("Inserting complaint: ~p~n", [Complaint]),
-    {ok, 1}.  %% returns {ok, ComplaintID}
+%% Insert complaint into DB
+save_complaint(Resident, Category, Address, Details, Img) ->
+    Sql = "INSERT INTO complaints (resident, category, address, details, img) VALUES (?, ?, ?, ?, ?)",
+    db_manager:query(Sql, [Resident, Category, Address, Details, Img]).
 
-%% List all complaints (dummy)
-list_complaints() ->
-    [
-        #{id => 1, category => <<"Noise">>, status => <<"Pending">>},
-        #{id => 2, category => <<"Garbage">>, status => <<"Resolved">>}
-    ].
-
-%% Update complaint (dummy)
-update_complaint(Id, NewStatus) ->
-    io:format("Updating complaint ~p to ~p~n", [Id, NewStatus]),
-    ok.
+%% Fetch complaint by ID
+get_complaint_by_id(Id) ->
+    Sql = "SELECT id, resident, category, address, details, img, status FROM complaints WHERE id = ?",
+    db_manager:query(Sql, [Id]).

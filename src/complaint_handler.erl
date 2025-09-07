@@ -1,4 +1,5 @@
-% Resident complaints (submit/view) || Handles resident complaint submission
+% The business logic for handling complaints (submitting, tracking, retrieving status).
+% Likely called from router when a request matches /complaint or /track.
 
 -module(complaint_handler).
 -behaviour(cowboy_handler).

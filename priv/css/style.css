@@ -420,3 +420,18 @@ right: 20px
     font-size: 14px;
     color: var(--ink);
 }
+
+.form-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #d6002f; /* match your red login button */
+  outline: none;
+}

@@ -12,6 +12,6 @@
       officer_handler,
       reklamo_hub
   ]},
-  {applications, [kernel, stdlib, cowboy]},
+  {applications, [kernel, stdlib, mysql, cowboy, jsx]},
   {mod, {reklamohub_app, []}}
  ]}.

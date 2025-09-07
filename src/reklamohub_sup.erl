@@ -1,27 +1,23 @@
 % Supervisor (Cowboy + DB connection)
+% Supervisor for fault tolerance. Ensures that db_manager and other workers restart if they crash.
 
 -module(reklamohub_sup).
 -behaviour(supervisor).
-
--export([start_link/0]).
--export([init/1]).
+-export([start_link/0, init/1]).
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-
+    
 init([]) ->
     io:format("~nReklamoHub starting...~n"),
 
     Dispatch = cowboy_router:compile([
         {'_', [
-            %% API routes
             {"/submit_complaint", complaint_handler, []},
             {"/track_complaint", complaint_handler, []},
             {"/admin_login", admin_handler, []},
             {"/admin_dashboard", admin_handler, []},
             {"/update_status", admin_handler, []},
-
-            %% Static files (fallback)
             {"/[...]", reklamohub_router, []}
         ]}
     ]),
