@@ -1,5 +1,3 @@
-% Minimal admin login using mysql-otp pool via db_manager
-
 -module(admin_handler).
 -behaviour(cowboy_handler).
 -export([init/2]).
@@ -9,8 +7,16 @@ init(Req0, State) ->
     Path   = cowboy_req:path(Req0),
     case {Method, Path} of
         {<<"GET">>, <<"/admin_login">>} ->
-            Req = cowboy_req:reply(302, #{<<"location">> => <<"/admin_login.html">>}, <<>>, Req0),
-            {ok, Req, State};
+            case file:read_file("priv/html/admin_login.html") of
+                {ok, Html} ->
+                    Req = cowboy_req:reply(200,
+                        #{<<"content-type">> => <<"text/html">>}, Html, Req0),
+                    {ok, Req, State};
+                {error, Reason} ->
+                    io:format("Error reading admin_login.html: ~p~n", [Reason]),
+                    Req = cowboy_req:reply(500, #{<<"content-type">> => <<"text/plain">>}, <<"Internal Server Error: Missing file.">>, Req0),
+                    {ok, Req, State}
+            end;
 
         {<<"POST">>, <<"/admin_login">>} ->
             {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
@@ -20,13 +26,16 @@ init(Req0, State) ->
             case check_login(Username, Password) of
                 true ->
                     Headers = #{
-                        <<"set-cookie">> => <<"admin=1; HttpOnly; Path=/">>,
-                        <<"location">>   => <<"/admin_dashboard">>
+                        <<"location">> => <<"/admin_dashboard">>,
+                        <<"set-cookie">> => [<<"admin=1; Path=/; HttpOnly">>]
                     },
                     Req = cowboy_req:reply(302, Headers, <<>>, Req1),
                     {ok, Req, State};
                 false ->
-                    Req = cowboy_req:reply(302, #{<<"location">> => <<"/admin_login.html?error=1">>}, <<>>, Req1),
+                    Req = cowboy_req:reply(
+                        302,
+                        #{<<"location">> => <<"/admin_login.html?error=1">>},
+                        <<>>, Req1),
                     {ok, Req, State}
             end;
 
@@ -34,10 +43,19 @@ init(Req0, State) ->
             Cookies = cowboy_req:parse_cookies(Req0),
             case lists:keyfind(<<"admin">>, 1, Cookies) of
                 {_, <<"1">>} ->
-                    Req = cowboy_req:reply(302, #{<<"location">> => <<"/admin_dashboard.html">>}, <<>>, Req0),
-                    {ok, Req, State};
+                    case file:read_file("priv/html/admin_dashboard.html") of
+                        {ok, Html} ->
+                            Req = cowboy_req:reply(200,
+                                #{<<"content-type">> => <<"text/html">>}, Html, Req0),
+                            {ok, Req, State};
+                        {error, Reason} ->
+                            io:format("Error reading admin_dashboard.html: ~p~n", [Reason]),
+                            Req = cowboy_req:reply(500, #{<<"content-type">> => <<"text/plain">>}, <<"Internal Server Error: Missing file.">>, Req0),
+                            {ok, Req, State}
+                    end;
                 _ ->
-                    Req = cowboy_req:reply(302, #{<<"location">> => <<"/admin_login.html">>}, <<>>, Req0),
+                    Req = cowboy_req:reply(302,
+                        #{<<"location">> => <<"/admin_login">>}, <<>>, Req0),
                     {ok, Req, State}
             end;
 
@@ -57,12 +75,9 @@ to_bin(B) when is_binary(B) -> B;
 to_bin(L) when is_list(L)   -> list_to_binary(L);
 to_bin(Other)               -> iolist_to_binary(io_lib:format("~p", [Other])).
 
-check_login(U, P) when U =:= <<>>; P =:= <<>> ->
-    false;
+check_login(U, P) when U =:= <<>>; P =:= <<>> -> false;
 check_login(U, P) ->
     case reklamohub_db:get_admin_password(U) of
-        {ok, #{rows := [[DbPass]]}} ->
-            to_bin(P) =:= to_bin(DbPass);
-        _ ->
-            false
+        {ok, _Cols, [[DbPass]]} -> to_bin(P) =:= to_bin(DbPass);
+        _ -> false
     end.
