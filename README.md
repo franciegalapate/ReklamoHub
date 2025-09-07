@@ -4,7 +4,7 @@
 An OTP library
 
 ## How to Run
-    $ rebar3 make-deps
+    $ rebar3 get-deps
     $ rebar3 compile
     $ rebar3 shell
 

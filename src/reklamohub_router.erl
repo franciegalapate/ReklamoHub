@@ -25,6 +25,11 @@ init(Req0, State) ->
         <<"/track_complaint">> ->
             complaint_handler:init(Req0, State);
 
+        %% WebSocket endpoint for real-time updates
+        <<"/officer_dashboard">> ->
+            {upgrade, protocol, cowboy_websocket};
+
+
         %% Otherwise → serve static files
         _ ->
             serve_static(Req0, State)

@@ -7,7 +7,7 @@
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-    
+
 init([]) ->
     io:format("~nReklamoHub starting...~n"),
 
@@ -18,6 +18,11 @@ init([]) ->
             {"/admin_login", admin_handler, []},
             {"/admin_dashboard", admin_handler, []},
             {"/update_status", admin_handler, []},
+
+            %% WebSocket handler
+            {"/officer_dashboard", officer_websocket_handler, []},
+
+            %% Static files (fallback)
             {"/[...]", reklamohub_router, []}
         ]}
     ]),
