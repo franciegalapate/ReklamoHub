@@ -17,7 +17,6 @@
 
 CREATE DATABASE IF NOT EXISTS reklamohub_db;
 USE reklamohub_db;
-
 --
 -- Table structure for table `admin`
 --
