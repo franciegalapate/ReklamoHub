@@ -15,6 +15,9 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+CREATE DATABASE IF NOT EXISTS reklamohub_db;
+USE reklamohub_db;
+
 --
 -- Table structure for table `admin`
 --
@@ -23,12 +26,11 @@ DROP TABLE IF EXISTS `admin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admin` (
-  `admin_id` int NOT NULL AUTO_INCREMENT,
   `admin_username` varchar(50) NOT NULL,
   `admin_password` varchar(255) NOT NULL,
-  PRIMARY KEY (`admin_id`),
+  PRIMARY KEY (`admin_username`),
   UNIQUE KEY `admin_username` (`admin_username`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +39,7 @@ CREATE TABLE `admin` (
 
 LOCK TABLES `admin` WRITE;
 /*!40000 ALTER TABLE `admin` DISABLE KEYS */;
-INSERT INTO `admin` VALUES (1,'admin','admin');
+INSERT INTO `admin` VALUES ('admin','admin');
 /*!40000 ALTER TABLE `admin` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -70,6 +72,43 @@ LOCK TABLES `complaints` WRITE;
 INSERT INTO `complaints` VALUES (1,'Juan Dela Cruz','Garbage','submitted','2025-09-06 08:33:53','uploads/img1.jpg','123 Main St, Barangay Uno','Garbage has not been collected for 3 days.'),(2,'Maria Santos','Noise','in progress','2025-09-06 08:33:53',NULL,'45 Mabini St, Barangay Dos','Loud karaoke every night until 2am.'),(3,'Jose Ramirez','Road Damage','resolved','2025-09-06 08:33:53','uploads/img2.jpg','678 Rizal Ave, Barangay Tres','Huge pothole in front of our house.'),(4,'Ana Lopez','Water Supply','rejected','2025-09-06 08:33:53',NULL,'12 P. Burgos St, Barangay Cuatro','No running water since last week.'),(5,'Pedro Reyes','Streetlight','submitted','2025-09-06 08:33:53',NULL,'89 Del Pilar St, Barangay Cinco','Broken streetlight near the basketball court.'),(6,'Juan Dela Cruz','Garbage','submitted','2025-09-06 08:35:00','uploads/img1.jpg','123 Main St, Barangay Uno','Garbage has not been collected for 3 days.'),(7,'Maria Santos','Noise','in progress','2025-09-06 08:35:00',NULL,'45 Mabini St, Barangay Dos','Loud karaoke every night until 2am.'),(8,'Jose Ramirez','Road Damage','resolved','2025-09-06 08:35:00','uploads/img2.jpg','678 Rizal Ave, Barangay Tres','Huge pothole in front of our house.'),(9,'Ana Lopez','Water Supply','rejected','2025-09-06 08:35:00',NULL,'12 P. Burgos St, Barangay Cuatro','No running water since last week.'),(10,'Pedro Reyes','Streetlight','submitted','2025-09-06 08:35:00',NULL,'89 Del Pilar St, Barangay Cinco','Broken streetlight near the basketball court.');
 /*!40000 ALTER TABLE `complaints` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `complaints_view`
+--
+
+DROP TABLE IF EXISTS `complaints_view`;
+/*!50001 DROP VIEW IF EXISTS `complaints_view`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `complaints_view` AS SELECT 
+ 1 AS `complaint_id`,
+ 1 AS `resident`,
+ 1 AS `category`,
+ 1 AS `status`,
+ 1 AS `filed_date`,
+ 1 AS `address`,
+ 1 AS `details`,
+ 1 AS `img`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Final view structure for view `complaints_view`
+--
+
+/*!50001 DROP VIEW IF EXISTS `complaints_view`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb3 */;
+/*!50001 SET character_set_results     = utf8mb3 */;
+/*!50001 SET collation_connection      = utf8mb3_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `complaints_view` AS select concat('CMP-',lpad(`complaints`.`complaint_id`,4,'0')) AS `complaint_id`,`complaints`.`resident` AS `resident`,`complaints`.`category` AS `category`,`complaints`.`status` AS `status`,date_format(`complaints`.`date`,'%Y-%m-%d %H:%i:%s') AS `filed_date`,`complaints`.`address` AS `address`,`complaints`.`details` AS `details`,`complaints`.`img` AS `img` from `complaints` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -80,4 +119,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-06 16:35:24
+-- Dump completed on 2025-09-07 12:10:46

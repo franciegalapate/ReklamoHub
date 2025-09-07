@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complaint Status</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="frame">
+    <header class="hero">
+      <div class="brand">
+        <img src="/assets/logo/logo_subtitle.png" alt="Logo" class="logo-img" />
+        <h1>Complaint Status</h1>
+      </div>
+      <p class="subtitle">
+        Here are the details for your complaint tracking ID.
+      </p>
+    </header>
+
+    <main class="card" style="text-align:center;">
+      <div id="complaintDetails"></div>
+
+      <div class="actions" style="margin-top:20px;">
+        <a href="track_complaints.html" class="btn btn-primary">🔙 Back to Tracking</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Get the tracking ID from the query string
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const detailsDiv = document.getElementById("complaintDetails");
+
+    if (!id) {
+      detailsDiv.innerHTML = "<p style='color:red;'>❌ No tracking ID provided.</p>";
+    } else {
+      // Demo lookup (replace with DB/API later)
+      if (id === "CMP-0005") {
+        detailsDiv.innerHTML = `
+          <p>✅ Complaint <strong>${id}</strong> is currently <span class="status-submitted">Submitted</span>.</p>
+          <p><em>Date Filed:</em> Sept 6, 2025</p>
+          <p><em>Category:</em> Garbage Collection</p>
+          <p><em>Remarks:</em> Awaiting assignment to officer</p>
+        `;
+      } else {
+        detailsDiv.innerHTML = `<p>⚠️ No record found for <strong>${id}</strong>.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
