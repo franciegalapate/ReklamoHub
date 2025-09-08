@@ -54,15 +54,57 @@ const modalPhoto = document.getElementById('modal-photo');
 const modalPhotoContainer = document.getElementById('modal-photo-container');
 const statusFilter = document.getElementById('status-filter');
 
-let currentFilter = 'All';
+let currentFilter = 'all';
 let complaintsCache = []; // hold latest complaints from backend
+
+// Filter
+if (statusFilter) {
+  statusFilter.addEventListener("change", () => {
+    const selected = statusFilter.value;
+    let filtered = complaintsCache;
+
+    if (selected !== "all") {
+      filtered = complaintsCache.filter(c => c.status === selected);
+    }
+
+    renderComplaints(filtered);
+  });
+}
+
+function renderComplaints(complaints) {
+  complaintsTableBody.innerHTML = "";
+
+  complaints.forEach(complaint => {
+    const tr = document.createElement("tr");
+    const statusClass = complaint.status.replace(/\s+/g, "-").toLowerCase();
+
+    tr.innerHTML = `
+      <td>${complaint.complaint_id}</td>
+      <td>${complaint.resident || 'Anonymous'}</td>
+      <td>${complaint.address}</td>
+      <td>${complaint.category}</td>
+      <td>${complaint.details.substring(0, 50)}...</td>
+      <td>${complaint.img ? `<img src="${complaint.img}" alt="Photo" class="photo-thumbnail">` : '—'}</td>
+      <td>
+        <select class="status-select status-${statusClass}" data-id="${complaint.complaint_id}">
+          <option value="submitted" ${complaint.status === 'submitted' ? 'selected' : ''}>Submitted</option>
+          <option value="in progress" ${complaint.status === 'in progress' ? 'selected' : ''}>In Progress</option>
+          <option value="resolved" ${complaint.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+          <option value="rejected" ${complaint.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+        </select>
+      </td>
+      <td><a href="#" class="view-details-btn" data-id="${complaint.complaint_id}">View Details</a></td>
+    `;
+    complaintsTableBody.appendChild(tr);
+  });
+}
 
 // --- Dashboard Rendering ---
 const renderTable = async () => {
     complaintsCache = await fetchComplaintsFromBackend();
     complaintsTableBody.innerHTML = '';
 
-    const filteredComplaints = (currentFilter === 'All')
+    const filteredComplaints = (currentFilter === 'all')
         ? complaintsCache
         : complaintsCache.filter(c => c.status === currentFilter);
 
