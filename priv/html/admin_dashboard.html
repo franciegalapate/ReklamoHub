@@ -1,89 +1,94 @@
 <!-- Barangay officer dashboard -->
 
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Barangay Officer Dashboard</title>
-     <link rel="stylesheet" href="/css/style.css"/>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="/css/style.css"/>
 </head>
 <body>
-    <div class="frame_dashboard">
-        <!-- Header/Navbar -->
-        <header class="navbar">
-            <div class="left">
-                <img src="/assets/logo/logo.png" alt="Logo" class="logo-img_nav">
-            </div>
-            <div class="right">
-                <button id="logout-btn" class="btn btn-primary">
-                    Logout
-                </button>
-            </div>
-        </header>
+<div class="frame_dashboard">
+    <!-- Header/Navbar -->
+    <header class="navbar">
+        <div class="left">
+            <img src="/assets/logo/logo.png" alt="Logo" class="logo-img_nav">
+        </div>
+        <div class="right">
+            <button id="logout-btn" class="btn btn-primary">
+                Logout
+            </button>
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <main class="card_dashboard">
-            <div class="flex items-center justify-between mb-4">
-                <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Community Complaints Dashboard</h1>
-            </div>
-            
-            <!-- Filter Section -->
-            <div class="filter-container">
-                <label for="status-filter">Filter by Status:</label>
-                <select id="status-filter" class="status-select">
-                    <option value="all">All</option>
-                    <option value="submitted">Submitted</option>
-                    <option value="in progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div>
+    <!-- Main Content -->
+    <main class="card_dashboard">
+        <div class="header-main">
+            <h1 class="community-complaints-title">Community Complaints Dashboard</h1>
+        </div>
 
-            <!-- Complaints Table Section -->
-            <div class="overflow-x-auto">
-                <div id="status-message" style="margin-bottom:10px; text-align:center;"></div>
+        <!-- Filter Section -->
+        <div class="filter-container">
+            <label for="status-filter">Filter by Status:</label>
+            <select id="status-filter" class="status-select">
+                <option value="all">All</option>
+                <option value="submitted">Submitted</option>
+                <option value="in progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+
+        <!-- Complaints Table Section -->
+        <div class="overflow-x-auto">
+            <div id="status-message"></div>
+            <div class="scrollable-table-container">
                 <table class="complaints-table">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Complainer</th>
-                            <th>Address</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th>Photo</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
+                    <tr>
+                        <th class="w-16">ID</th>
+                        <th class="w-48">Complainer</th>
+                        <th class="w-48">Address</th>
+                        <th class="w-32">Category</th>
+                        <th class="w-64">Description</th>
+                        <th class="w-24">Photo</th>
+                        <th class="w-32">Status</th>
+                        <th class="w-24"></th>
+                    </tr>
                     </thead>
                     <tbody id="complaints-table-body">
-                        <!-- Table rows will be inserted here by JavaScript -->
+                    <!-- Table rows will be inserted here by JavaScript -->
                     </tbody>
                 </table>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
+</div>
 
-    <!-- Detailed View Modal -->
-    <div id="modal-backdrop" class="modal-backdrop">
-        <div id="complaint-modal" class="modal-content">
-            <button id="close-modal-btn" class="modal-close-btn">&times;</button>
-            <div class="modal-details">
-                <h3>Complaint Details</h3>
-                <p><strong>Complainer:</strong> <span id="modal-name"></span></p>
-                <p><strong>Address:</strong> <span id="modal-address"></span></p>
-                <p><strong>Category:</strong> <span id="modal-category"></span></p>
-                <p><strong>Description:</strong></p>
-                <p id="modal-description"></p>
-                <div id="modal-photo-container">
-                    <p><strong>Photo:</strong></p>
-                    <img id="modal-photo" src="" alt="Complaint Photo" />
-                </div>
+<!-- Detailed View Modal -->
+<div id="modal-backdrop" class="modal-backdrop">
+    <div id="complaint-modal" class="modal-content">
+        <button id="close-modal-btn" class="modal-close-btn">&times;</button>
+        <div class="modal-details">
+            <h3>Complaint Details</h3>
+            <p><strong>Complainer:</strong> <span id="modal-name"></span></p>
+            <p><strong>Address:</strong> <span id="modal-address"></span></p>
+            <p><strong>Category:</strong> <span id="modal-category"></span></p>
+            <p><strong>Description:</strong></p>
+            <p id="modal-description"></p>
+            <div id="modal-photo-container">
+                <p><strong>Photo:</strong></p>
+                <img id="modal-photo" src="" alt="Complaint Photo" />
             </div>
         </div>
     </div>
+</div>
 
-    <!-- JavaScript -->
-    <script src="/javascript/script_dashboard.js"></script>
+<!-- JavaScript -->
+<script src="/javascript/script_dashboard.js"></script>
+
 </body>
 </html>
