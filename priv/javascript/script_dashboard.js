@@ -266,8 +266,21 @@ logoutBtn.addEventListener('click', () => {
           // The cache is still updated, so it will appear when the filter changes
 
         } else if (msg.type === "status_update") {
-          console.log("🔄 Status update:", msg.complaints);
-          // You can add logic here to update a single row rather than re-rendering the entire table
+           console.log("🔄 Status update:", msg.complaint);
+                      const updatedComplaint = msg.complaint;
+                      // Find the corresponding complaint in the local cache and update it
+                      const complaintIndex = complaintsCache.findIndex(c => c.complaint_id === updatedComplaint.complaint_id);
+                      if (complaintIndex !== -1) {
+                          complaintsCache[complaintIndex].status = updatedComplaint.status;
+                      }
+
+                      // Find the table row and update its status dropdown
+                      const selectElement = document.querySelector(`.status-select[data-id="${updatedComplaint.complaint_id}"]`);
+                      if (selectElement) {
+                          selectElement.value = updatedComplaint.status;
+                          updateStatusColor(selectElement); // Re-use the existing helper function
+
+        }
         }
       } catch (err) {
         console.error("WS parse error:", err, event.data);

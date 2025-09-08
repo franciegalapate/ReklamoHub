@@ -18,16 +18,12 @@ websocket_handle({text, Msg}, State) ->
     case maps:get(<<"type">>, Map, undefined) of
       <<"ping">> ->
         io:format("Ping message received from client.~n"),
-        %% You can reply with a pong here if you want, but Cowboy's built-in ping-pong is more efficient.
-        %% The client-side ping is what matters to keep the connection alive.
         {ok, State};
       _ ->
-        %% Handle other text messages here if needed
         {ok, State}
     end
   catch
     _Class:_Reason ->
-      %% Message was not valid JSON, ignore or log it
       io:format("Received invalid message: ~p~n", [Msg]),
       {ok, State}
   end;
@@ -56,6 +52,25 @@ websocket_info({new_complaint, Complaint}, State) ->
   catch
     Class:Reason:Stack ->
       io:format("❌ WS encode crash: ~p ~p ~p~n", [Class, Reason, Stack]),
+      {ok, State}
+  end;
+
+websocket_info({complaint_status_update, Complaint}, State) ->
+  TS = os:timestamp(), % or erlang:now(), they both return {MegaSecs, Secs, MicroSecs}
+  {_,_,Micro} = TS,
+  {{Year,Month,Day},{Hour,Minute,Second}} = calendar:now_to_local_time(TS),
+  io:format("~p: 📩 WS got complaint_status_update: ~p~n",
+    [[{Year, Month, Day}, {Hour, Minute, Second}, Micro], Complaint]),
+  try
+    Json = jsx:encode(#{
+      <<"type">> => <<"status_update">>,
+      <<"complaint">> => Complaint
+    }),
+    io:format("~p: 📤 WS sending status update to client~n", [[{Year, Month, Day}, {Hour, Minute, Second}, Micro]]),
+    {reply, {text, Json}, State}
+  catch
+    Class:Reason:Stack ->
+      io:format("~p: ❌ WS encode crash: ~p ~p ~p~n", [[{Year, Month, Day}, {Hour, Minute, Second}, Micro], Class, Reason, Stack]),
       {ok, State}
   end;
 

@@ -112,6 +112,10 @@ init(Req0, State) ->
                     case reklamohub_db:get_complaint_by_id(ComplaintID) of
                         {ok, #{columns := Cols, rows := [Row]}} ->
                             JsonRow = maps:from_list(lists:zip(Cols, Row)),
+
+                            %% ✅ Call dashboard_manager to broadcast the status update
+                            dashboard_manager:status_update(JsonRow),
+
                             Json = jsx:encode(JsonRow),
                             Req = cowboy_req:reply(200,
                                 #{<<"content-type">> => <<"application/json">>},
@@ -119,6 +123,10 @@ init(Req0, State) ->
                             {ok, Req, State};
                         {ok, Cols, [Row]} ->
                             JsonRow = maps:from_list(lists:zip(Cols, Row)),
+
+                            %% ✅ Call dashboard_manager to broadcast the status update
+                            dashboard_manager:status_update(JsonRow),
+
                             Json = jsx:encode(JsonRow),
                             Req = cowboy_req:reply(200,
                                 #{<<"content-type">> => <<"application/json">>},
