@@ -18,6 +18,22 @@ if (form) {
       img: document.getElementById("photo").files[0]?.name || null
     };
 
+    const requiredFields = {
+      address: data.address,
+      category: data.category,
+      details: data.details
+    };
+
+    const missing = Object.keys(requiredFields).filter(
+      (key) => !requiredFields[key]
+    );
+
+    if (missing.length > 0) {
+      alert("❌ Please fill in: " + missing.join(", "));
+      submitBtn.disabled = false;
+      return;
+    }
+
     try {
       const res = await fetch("/submit_complaint", {
         method: "POST",
