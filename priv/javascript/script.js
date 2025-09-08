@@ -1,74 +1,76 @@
 // Handle form submit via AJAX
-const form = document.querySelector(".form");
+if (window.location.pathname === "/" || window.location.pathname === "/index.html") {
+  const form = document.querySelector(".form");
 
-if (form) {
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const submitBtn = form.querySelector("button[type=submit]");
-    submitBtn.disabled = false;
-
-    const data = {
-      resident: document.getElementById("anonymous").checked
-        ? null
-        : document.getElementById("name").value,
-      address: document.getElementById("address1").value,
-      category: document.getElementById("category").value,
-      details: document.getElementById("details").value,
-      img: document.getElementById("photo").files[0]?.name || null
-    };
-
-    const requiredFields = {
-      address: data.address,
-      category: data.category,
-      details: data.details
-    };
-
-    const missing = Object.keys(requiredFields).filter(
-      (key) => !requiredFields[key]
-    );
-
-    if (missing.length > 0) {
-      alert("❌ Please fill in: " + missing.join(", "));
+      const submitBtn = form.querySelector("button[type=submit]");
       submitBtn.disabled = false;
-      return;
-    }
 
-    try {
-      const res = await fetch("/submit_complaint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const data = {
+        resident: document.getElementById("anonymous").checked
+          ? null
+          : document.getElementById("name").value,
+        address: document.getElementById("address1").value,
+        category: document.getElementById("category").value,
+        details: document.getElementById("details").value,
+        img: document.getElementById("photo").files[0]?.name || null
+      };
 
-      const json = await res.json();
+      const requiredFields = {
+        address: data.address,
+        category: data.category,
+        details: data.details
+      };
 
-      if (res.ok) {
-        // Display the full complaint record
-        const msg = `
-        ✅ Complaint submitted successfully!
-        -------------------------------
-        Tracking ID: ${json.complaint_id}
-        Resident: ${json.resident || "Anonymous"}
-        Category: ${json.category}
-        Status: ${json.status}
-        Date: ${json.date}
-        Address: ${json.address}
-        Details: ${json.details}
-        `;
+      const missing = Object.keys(requiredFields).filter(
+        (key) => !requiredFields[key]
+      );
 
-        alert(msg.trim());
-        form.reset();
-      } else {
-        alert(`❌ Error: ${json.error || "Could not save complaint"}`);
+      if (missing.length > 0) {
+        alert("❌ Please fill in: " + missing.join(", "));
+        submitBtn.disabled = false;
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      alert("⚠️ Network error. Please try again.");
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
+
+      try {
+        const res = await fetch("/submit_complaint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const json = await res.json();
+
+        if (res.ok) {
+          // Display the full complaint record
+          const msg = `
+          ✅ Complaint submitted successfully!
+          -------------------------------
+          Tracking ID: ${json.complaint_id}
+          Resident: ${json.resident || "Anonymous"}
+          Category: ${json.category}
+          Status: ${json.status}
+          Date: ${json.date}
+          Address: ${json.address}
+          Details: ${json.details}
+          `;
+
+          alert(msg.trim());
+          form.reset();
+        } else {
+          alert(`❌ Error: ${json.error || "Could not save complaint"}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("⚠️ Network error. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
 }
 
 // Track complaint by ID
