@@ -5,12 +5,14 @@
   {description, "ReklamoHub"},
   {vsn, "1.0"},
   {modules, [
-      reklamohub_app,
-      reklamohub_sup,
-      reklamohub_router,
-      complaint_handler,
-      officer_handler,
-      reklamo_hub
+    reklamohub_app,
+    reklamohub_sup,
+    complaint_handler,
+    admin_handler,
+    admin_ws_handler,
+    reklamohub_router,
+    dashboard_manager,
+    db_manager
   ]},
   {registered, []},
   {applications, [kernel, stdlib, mysql, cowboy, jsx]},

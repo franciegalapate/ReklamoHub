@@ -13,9 +13,6 @@ init(Req0, State) ->
         <<"/admin_login">> ->
             admin_handler:init(Req0, State);
 
-        <<"/admin_dashboard">> ->
-            admin_handler:init(Req0, State);
-
         <<"/update_status">> ->
             admin_handler:init(Req0, State);
 
@@ -25,10 +22,14 @@ init(Req0, State) ->
         <<"/track_complaint">> ->
             complaint_handler:init(Req0, State);
 
+        <<"/admin_dashboard">> ->
+            {cowboy_websocket, admin_ws_handler, State};
+
         %% Otherwise → serve static files
         _ ->
             serve_static(Req0, State)
     end.
+
 
 serve_static(Req0, State) ->
     Path = binary_to_list(cowboy_req:path(Req0)),

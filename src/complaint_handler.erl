@@ -37,9 +37,21 @@ handle_submit(Req0, State) ->
             %% Fetch the full complaint row using same DB logic as tracking
             case reklamohub_db:get_complaint_by_id(ID) of
                 {ok, #{columns := Cols, rows := [Row]}} ->
+                    Complaint = normalize_complaint(maps:from_list(lists:zip(Cols, Row))),
+
+                    %%Notify dashboard_manager
+                    dashboard_manager:new_complaint(Complaint),
+
                     reply_with_complaint(Cols, Row, Req1, State);
+
                 {ok, Cols, [Row]} ->
+                    Complaint = normalize_complaint(maps:from_list(lists:zip(Cols, Row))),
+
+                    %% Notify dashboard_manager
+                    dashboard_manager:new_complaint(Complaint),
+
                     reply_with_complaint(Cols, Row, Req1, State);
+
                 FetchError ->
                     io:format("❌ ERROR fetching complaint after insert: ~p~n", [FetchError]),
                     Req = cowboy_req:reply(500,

@@ -225,3 +225,26 @@ logoutBtn.addEventListener('click', () => {
     document.cookie = "admin=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     window.location.href = "/admin_login";
 });
+
+// --- WebSocket for live complaints ---
+const ws = new WebSocket("ws://" + window.location.host + "/ws/complaints");
+
+ws.onopen = () => {
+  console.log("✅ Connected to WS");
+};
+
+ws.onmessage = (event) => {
+  try {
+    const msg = JSON.parse(event.data);
+    if (msg.type === "update") {
+      complaintsCache = msg.complaints;
+      renderTable();
+    }
+  } catch (err) {
+    console.error("WS parse error:", err);
+  }
+};
+
+ws.onclose = () => {
+  console.warn("⚠️ WS disconnected");
+};
