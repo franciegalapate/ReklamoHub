@@ -226,25 +226,43 @@ logoutBtn.addEventListener('click', () => {
     window.location.href = "/admin_login";
 });
 
-// --- WebSocket for live complaints ---
-const ws = new WebSocket("ws://" + window.location.host + "/ws/complaints");
+    // --- WebSocket for live complaints ---
+    const ws = new WebSocket("ws://" + window.location.host + "/ws/complaints");
 
-ws.onopen = () => {
-  console.log("✅ Connected to WS");
-};
+    ws.onopen = () => {
+      console.log("✅ WS connected to server");
+    };
 
-ws.onmessage = (event) => {
-  try {
-    const msg = JSON.parse(event.data);
-    if (msg.type === "update") {
-      complaintsCache = msg.complaints;
-      renderTable();
-    }
-  } catch (err) {
-    console.error("WS parse error:", err);
-  }
-};
+        ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        console.log("📩 WS message:", msg);
 
-ws.onclose = () => {
-  console.warn("⚠️ WS disconnected");
-};
+        if (msg.type === "new") {
+          const newComplaint = msg.complaint;
+
+          // Prepend the new complaint to ensure it appears at the top
+          complaintsCache.unshift(newComplaint);
+
+          // Check if the new complaint's status matches the current filter
+          const isVisible = currentFilter === 'all' || newComplaint.status === currentFilter;
+
+          if (isVisible) {
+            // If it's visible, update the UI by re-rendering the filtered list
+            const filteredComplaints = (currentFilter === 'all')
+                ? complaintsCache
+                : complaintsCache.filter(c => c.status === currentFilter);
+
+            renderComplaints(filteredComplaints);
+          }
+          // If the new complaint is not visible with the current filter, do nothing
+          // The cache is still updated, so it will appear when the filter changes
+
+        } else if (msg.type === "status_update") {
+          console.log("🔄 Status update:", msg.complaints);
+          // You can add logic here to update a single row rather than re-rendering the entire table
+        }
+      } catch (err) {
+        console.error("WS parse error:", err, event.data);
+      }
+    };

@@ -15,15 +15,13 @@
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-%% Called by the websocket handler when a dashboard connects
 add_subscriber(Pid) when is_pid(Pid) ->
   gen_server:cast(?MODULE, {add_subscriber, Pid}).
 
-%% Called by complaint_handler when a new complaint is saved
+%% ✅ This is the corrected function. It sends a message to the GenServer.
 new_complaint(Complaint) ->
-  gen_server:cast(?MODULE, {broadcast_new, Complaint}).
+  gen_server:cast(?MODULE, {broadcast_new_complaint, Complaint}).
 
-%% Called by handlers when status changes
 status_update(Complaint) ->
   gen_server:cast(?MODULE, {broadcast_status, Complaint}).
 
@@ -37,9 +35,13 @@ handle_cast({add_subscriber, Pid}, State = #state{subscribers = Subs}) ->
   NewSubs = maps:put(Pid, Ref, Subs),
   {noreply, State#state{subscribers = NewSubs}};
 
-handle_cast({broadcast_new, Complaint}, State = #state{subscribers = Subs}) ->
-  io:format("📢 Broadcasting NEW complaint to ~p dashboards~n", [maps:size(Subs)]),
-  maps:foreach(fun(Pid, _Ref) -> Pid ! {complaint_update, Complaint} end, Subs),
+%% ✅ This is the new handle_cast clause that receives the message and broadcasts it.
+handle_cast({broadcast_new_complaint, Complaint}, State=#state{subscribers=Subs}) ->
+  io:format("📢 Broadcasting NEW complaint: ~p to ~p dashboards~n", [Complaint, maps:size(Subs)]),
+  maps:foreach(fun(Pid, _Ref) ->
+    io:format("➡️ Sending {new_complaint, Complaint} to ~p~n", [Pid]),
+    Pid ! {new_complaint, Complaint}
+               end, Subs),
   {noreply, State};
 
 handle_cast({broadcast_status, Complaint}, State = #state{subscribers = Subs}) ->
@@ -53,7 +55,6 @@ handle_cast(_Other, State) ->
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 
-%% Remove subscriber automatically when process dies
 handle_info({'DOWN', _Ref, process, Pid, _Reason}, State = #state{subscribers = Subs}) ->
   io:format("❌ Dashboard disconnected: ~p~n", [Pid]),
   {noreply, State#state{subscribers = maps:remove(Pid, Subs)}};

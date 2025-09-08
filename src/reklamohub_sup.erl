@@ -9,36 +9,41 @@
       supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
   init([]) ->
-      io:format("~nReklamoHub starting...~n"),
+    io:format("~nReklamoHub starting...~n"),
 
-      DbChild =
-          {db_manager,
-           {db_manager, start, []},
-           permanent, 5000, worker, [db_manager]},
+    DbChild =
+      {db_manager,
+        {db_manager, start, []},
+        permanent, 5000, worker, [db_manager]},
 
-      % --- Cowboy routes ---
-      Dispatch = cowboy_router:compile([
-          {'_', [
-              {"/submit_complaint", complaint_handler, []},
-              {"/track_complaint", complaint_handler, []},
-              {"/admin_login", admin_handler, []},
-              {"/admin_dashboard", admin_handler, []},
-              {"/update_status", admin_handler, []},
-              {"/api/complaints", admin_handler, []},
-              {"/ws/complaints", admin_ws_handler, []},
-              {"/[...]", reklamohub_router, []}
-          ]}
-      ]),
+    DashboardChild =
+      {dashboard_manager,
+        {dashboard_manager, start_link, []},
+        permanent, 5000, worker, [dashboard_manager]},
 
-      % --- Cowboy listener ---
-       CowboyChild =
-          {http_listener,
-           {cowboy, start_clear, [
-               http_listener,
-               [{port, 8080}],
-               #{env => #{dispatch => Dispatch}}
-           ]},
-           transient,   %% <--- was permanent; now transient so shutdown is clean
-           5000, worker, dynamic},
+    % --- Cowboy routes ---
+    Dispatch = cowboy_router:compile([
+      {'_', [
+        {"/submit_complaint", complaint_handler, []},
+        {"/track_complaint", complaint_handler, []},
+        {"/admin_login", admin_handler, []},
+        {"/admin_dashboard", admin_handler, []},
+        {"/update_status", admin_handler, []},
+        {"/api/complaints", admin_handler, []},
+        {"/ws/complaints", admin_ws_handler, []},
+        {"/[...]", reklamohub_router, []}
+      ]}
+    ]),
 
-      {ok, {{one_for_one, 5, 10}, [DbChild, CowboyChild]}}.
+    % --- Cowboy listener ---
+    CowboyChild =
+      {http_listener,
+        {cowboy, start_clear, [
+          http_listener,
+          [{port, 8080}],
+          #{env => #{dispatch => Dispatch}}
+        ]},
+        transient,
+        5000, worker, dynamic},
+
+    {ok, {{one_for_one, 5, 10}, [DbChild, DashboardChild, CowboyChild]}}.
