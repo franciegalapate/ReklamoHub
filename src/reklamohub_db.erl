@@ -28,18 +28,9 @@ save_complaint(Resident, Category, Address, Details, Img) ->
             Error
     end.
 
-% Fetch complaint by ID (fixed to match schema: complaint_id)
+% Fetch complaint by ID
 get_complaint_by_id(ID) ->
-    Sql = "SELECT concat('CMP-', lpad(c.complaint_id,4,'0')) AS complaint_id, \
-                  c.resident, \
-                  c.category, \
-                  c.status, \
-                  DATE_FORMAT(c.date, '%Y-%m-%d %H:%i:%s') AS filed_date, \
-                  c.img, \
-                  c.address, \
-                  c.details \
-           FROM complaints c \
-           WHERE c.complaint_id = ?",
+    Sql = "SELECT * FROM complaints_view WHERE complaint_id = concat('CMP-', lpad(?,4,'0'))",
     db_manager:query(Sql, [ID]).
 
 %% --- Admin helpers ---
@@ -51,5 +42,5 @@ get_admin_password(Username) ->
 
 % Fetch all complaints (for admin dashboard)
 get_all_complaints() ->
-    Sql = "SELECT complaint_id, resident, category, status, date, img, address, details FROM complaints ORDER BY date DESC",
+    Sql = "SELECT * FROM complaints_view ORDER BY filed_date DESC",
     db_manager:query(Sql).

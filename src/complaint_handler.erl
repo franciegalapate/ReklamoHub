@@ -1,5 +1,4 @@
 % The business logic for handling complaints (submitting, tracking, retrieving status).
-% Likely called from router when a request matches /complaint or /track.
 
 -module(complaint_handler).
 -behaviour(cowboy_handler).
@@ -38,14 +37,9 @@ handle_submit(Req0, State) ->
             %% Fetch the full complaint row using same DB logic as tracking
             case reklamohub_db:get_complaint_by_id(ID) of
                 {ok, #{columns := Cols, rows := [Row]}} ->
-                    Obj0 = maps:from_list(lists:zip(Cols, Row)),
-                    Obj  = normalize_complaint(Obj0),
-                    Json = jsx:encode(Obj),
-                    Req = cowboy_req:reply(200,
-                        #{<<"content-type">> => <<"application/json">>},
-                        Json, Req1),
-                    {ok, Req, State};
-
+                    reply_with_complaint(Cols, Row, Req1, State);
+                {ok, Cols, [Row]} ->
+                    reply_with_complaint(Cols, Row, Req1, State);
                 FetchError ->
                     io:format("❌ ERROR fetching complaint after insert: ~p~n", [FetchError]),
                     Req = cowboy_req:reply(500,
@@ -81,13 +75,9 @@ handle_track(Req0, State) ->
             {ok, Req, State};
 
         {ok, #{columns := Cols, rows := [Row]}} ->
-            Obj0 = maps:from_list(lists:zip(Cols, Row)),
-            Obj  = normalize_complaint(Obj0),
-            Json = jsx:encode(Obj),
-            Req = cowboy_req:reply(200,
-                #{<<"content-type">> => <<"application/json">>},
-                Json, Req1),
-            {ok, Req, State};
+            reply_with_complaint(Cols, Row, Req1, State);
+        {ok, Cols, [Row]} ->
+            reply_with_complaint(Cols, Row, Req1, State);
 
         Error ->
             io:format("❌ ERROR in handle_track: ~p~n", [Error]),
@@ -96,6 +86,16 @@ handle_track(Req0, State) ->
                 <<"{\"error\":\"Database error\"}">>, Req1),
             {ok, Req, State}
     end.
+
+%% Helper to standardize the complaint response
+reply_with_complaint(Cols, Row, Req, State) ->
+    Obj0 = maps:from_list(lists:zip(Cols, Row)),
+    Obj  = normalize_complaint(Obj0),
+    Json = jsx:encode(Obj),
+    Resp = cowboy_req:reply(200,
+        #{<<"content-type">> => <<"application/json">>},
+        Json, Req),
+    {ok, Resp, State}.
 
 normalize_complaint(Obj0) ->
     #{
