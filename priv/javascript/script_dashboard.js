@@ -229,6 +229,13 @@ logoutBtn.addEventListener('click', () => {
     // --- WebSocket for live complaints ---
     const ws = new WebSocket("ws://" + window.location.host + "/ws/complaints");
 
+    // Set up a ping to keep the connection alive
+    setInterval(() => {
+        if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify({ type: "ping" }));
+        }
+    }, 30000); // Ping every 30 seconds
+
     ws.onopen = () => {
       console.log("✅ WS connected to server");
     };

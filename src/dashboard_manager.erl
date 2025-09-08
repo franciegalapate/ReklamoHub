@@ -4,7 +4,7 @@
 -behaviour(gen_server).
 
 %% Public API
--export([start_link/0, add_subscriber/1, new_complaint/1, status_update/1]).
+-export([start_link/0, add_subscriber/1, new_complaint/1, status_update/1, remove_subscriber/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, code_change/3]).
@@ -18,12 +18,14 @@ start_link() ->
 add_subscriber(Pid) when is_pid(Pid) ->
   gen_server:cast(?MODULE, {add_subscriber, Pid}).
 
-%% ✅ This is the corrected function. It sends a message to the GenServer.
 new_complaint(Complaint) ->
   gen_server:cast(?MODULE, {broadcast_new_complaint, Complaint}).
 
 status_update(Complaint) ->
   gen_server:cast(?MODULE, {broadcast_status, Complaint}).
+
+remove_subscriber(Pid) when is_pid(Pid) ->
+  gen_server:cast(?MODULE, {remove_subscriber, Pid}).
 
 %%% Callbacks
 init([]) ->
@@ -35,7 +37,6 @@ handle_cast({add_subscriber, Pid}, State = #state{subscribers = Subs}) ->
   NewSubs = maps:put(Pid, Ref, Subs),
   {noreply, State#state{subscribers = NewSubs}};
 
-%% ✅ This is the new handle_cast clause that receives the message and broadcasts it.
 handle_cast({broadcast_new_complaint, Complaint}, State=#state{subscribers=Subs}) ->
   io:format("📢 Broadcasting NEW complaint: ~p to ~p dashboards~n", [Complaint, maps:size(Subs)]),
   maps:foreach(fun(Pid, _Ref) ->
@@ -48,6 +49,10 @@ handle_cast({broadcast_status, Complaint}, State = #state{subscribers = Subs}) -
   io:format("🔄 Broadcasting STATUS UPDATE to ~p dashboards~n", [maps:size(Subs)]),
   maps:foreach(fun(Pid, _Ref) -> Pid ! {complaint_status_update, Complaint} end, Subs),
   {noreply, State};
+
+handle_cast({remove_subscriber, Pid}, State = #state{subscribers = Subs}) ->
+  io:format("❌ Manual unsubscribe from ~p~n", [Pid]),
+  {noreply, State#state{subscribers = maps:remove(Pid, Subs)}};
 
 handle_cast(_Other, State) ->
   {noreply, State}.
