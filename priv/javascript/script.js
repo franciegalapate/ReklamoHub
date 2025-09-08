@@ -1,36 +1,56 @@
-// Toggle anonymity (disable/clear name)
-const anonymous = document.getElementById('anonymous');
-const nameInput = document.getElementById('name');
+// Handle form submit via AJAX
+const form = document.querySelector(".form");
 
-if (anonymous && nameInput) {
-  anonymous.addEventListener('change', () => {
-    if (anonymous.checked) {
-      nameInput.value = '';
-      nameInput.setAttribute('disabled', 'disabled');
-    } else {
-      nameInput.removeAttribute('disabled');
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true; // prevent double submit
+
+    const data = {
+      resident: document.getElementById("anonymous").checked
+        ? null
+        : document.getElementById("name").value,
+      address: document.getElementById("address1").value,
+      category: document.getElementById("category").value,
+      details: document.getElementById("details").value,
+      img: document.getElementById("photo").files[0]?.name || null
+    };
+
+    try {
+      const res = await fetch("/submit_complaint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        // Display the full complaint record
+        const msg = `
+        ✅ Complaint submitted successfully!
+        -------------------------------
+        Tracking ID: ${json.complaint_id}
+        Resident: ${json.resident || "Anonymous"}
+        Category: ${json.category}
+        Status: ${json.status}
+        Date: ${json.date}
+        Address: ${json.address}
+        Details: ${json.details}
+        `;
+
+        alert(msg.trim());
+        form.reset();
+      } else {
+        alert(`❌ Error: ${json.error || "Could not save complaint"}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Network error. Please try again.");
+    } finally {
+      submitBtn.disabled = false; // re-enable button
     }
   });
-}
-
-// Show/hide 'Other category' textbox
-const categorySelect = document.getElementById('category');
-const otherWrap = document.getElementById('category-other-wrap');
-const otherInput = document.getElementById('category_other');
-
-function toggleOther() {
-  if (!categorySelect || !otherWrap || !otherInput) return;
-
-  const isOther = categorySelect.value === 'Others';
-  otherWrap.classList.toggle('hidden', !isOther);
-  otherInput.toggleAttribute('required', isOther);
-
-  if (!isOther) {
-    otherInput.value = '';
-  }
-}
-
-if (categorySelect) {
-  categorySelect.addEventListener('change', toggleOther);
-  toggleOther();
 }

@@ -25,7 +25,7 @@ init(Req0, State) ->
 % Submit a new complaint
 handle_submit(Req0, State) ->
     {ok, Body, Req1} = cowboy_req:read_body(Req0),
-    {ok, Map} = jsx:decode(Body, [return_maps]),
+    Map = jsx:decode(Body, [return_maps]),
 
     Resident = maps:get(<<"resident">>, Map, null),
     Category = maps:get(<<"category">>, Map),
@@ -35,13 +35,27 @@ handle_submit(Req0, State) ->
 
     case reklamohub_db:save_complaint(Resident, Category, Address, Details, Img) of
         {ok, #{last_insert_id := ID}} ->
-            Json = jsx:encode(#{ message => <<"Complaint submitted">>, complaint_id => ID }),
-            Req = cowboy_req:reply(200,
-                #{<<"content-type">> => <<"application/json">>},
-                Json, Req1),
-            {ok, Req, State};
+            %% Fetch the full complaint row using same DB logic as tracking
+            case reklamohub_db:get_complaint_by_id(ID) of
+                {ok, #{columns := Cols, rows := [Row]}} ->
+                    Obj0 = maps:from_list(lists:zip(Cols, Row)),
+                    Obj  = normalize_complaint(Obj0),
+                    Json = jsx:encode(Obj),
+                    Req = cowboy_req:reply(200,
+                        #{<<"content-type">> => <<"application/json">>},
+                        Json, Req1),
+                    {ok, Req, State};
 
-        _Error ->
+                FetchError ->
+                    io:format("❌ ERROR fetching complaint after insert: ~p~n", [FetchError]),
+                    Req = cowboy_req:reply(500,
+                        #{<<"content-type">> => <<"application/json">>},
+                        <<"{\"error\":\"Complaint saved, but could not retrieve details\"}">>, Req1),
+                    {ok, Req, State}
+            end;
+
+        SaveError ->
+            io:format("❌ ERROR in save_complaint: ~p~n", [SaveError]),
             Req = cowboy_req:reply(500,
                 #{<<"content-type">> => <<"application/json">>},
                 <<"{\"error\":\"Could not save complaint\"}">>, Req1),
@@ -51,7 +65,13 @@ handle_submit(Req0, State) ->
 % Track complaint by ID
 handle_track(Req0, State) ->
     {ComplaintIDStr, Req1} = cowboy_req:qs_val(<<"id">>, Req0),
-    ComplaintID = list_to_integer(binary_to_list(ComplaintIDStr)),
+
+    %% Allow "CMP-0001" or "1"
+    ComplaintID =
+        case binary:split(ComplaintIDStr, <<"CMP-">>) of
+            [OnlyNum] -> list_to_integer(binary_to_list(OnlyNum));
+            _ -> list_to_integer(binary_to_list(ComplaintIDStr))
+        end,
 
     case reklamohub_db:get_complaint_by_id(ComplaintID) of
         {ok, #{rows := []}} ->
@@ -61,16 +81,30 @@ handle_track(Req0, State) ->
             {ok, Req, State};
 
         {ok, #{columns := Cols, rows := [Row]}} ->
-            Obj = maps:from_list(lists:zip(Cols, Row)),
+            Obj0 = maps:from_list(lists:zip(Cols, Row)),
+            Obj  = normalize_complaint(Obj0),
             Json = jsx:encode(Obj),
             Req = cowboy_req:reply(200,
                 #{<<"content-type">> => <<"application/json">>},
                 Json, Req1),
             {ok, Req, State};
 
-        _Error ->
+        Error ->
+            io:format("❌ ERROR in handle_track: ~p~n", [Error]),
             Req = cowboy_req:reply(500,
                 #{<<"content-type">> => <<"application/json">>},
                 <<"{\"error\":\"Database error\"}">>, Req1),
             {ok, Req, State}
     end.
+
+normalize_complaint(Obj0) ->
+    #{
+        complaint_id => maps:get(<<"complaint_id">>, Obj0),
+        resident     => maps:get(<<"resident">>, Obj0),
+        category     => maps:get(<<"category">>, Obj0),
+        status       => maps:get(<<"status">>, Obj0),
+        date         => maps:get(<<"filed_date">>, Obj0),
+        img          => maps:get(<<"img">>, Obj0),
+        address      => maps:get(<<"address">>, Obj0),
+        details      => maps:get(<<"details">>, Obj0)
+    }.
