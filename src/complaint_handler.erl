@@ -58,13 +58,17 @@ handle_submit(Req0, State) ->
 
 % Track complaint by ID
 handle_track(Req0, State) ->
-    {ComplaintIDStr, Req1} = cowboy_req:qs_val(<<"id">>, Req0),
+    Qs = cowboy_req:parse_qs(Req0),
+    ComplaintIDStr = proplists:get_value(<<"id">>, Qs),
+    Req1 = Req0,
 
-    %% Allow "CMP-0001" or "1"
+    %% Normalize input: allow "CMP-0026" or "26"
     ComplaintID =
-        case binary:split(ComplaintIDStr, <<"CMP-">>) of
-            [OnlyNum] -> list_to_integer(binary_to_list(OnlyNum));
-            _ -> list_to_integer(binary_to_list(ComplaintIDStr))
+        case ComplaintIDStr of
+            <<"CMP-", NumBin/binary>> ->
+                list_to_integer(binary_to_list(NumBin));
+            NumBin ->
+                list_to_integer(binary_to_list(NumBin))
         end,
 
     case reklamohub_db:get_complaint_by_id(ComplaintID) of

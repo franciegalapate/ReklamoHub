@@ -12,4 +12,6 @@ start(_Type, _Args) ->
 
 stop(_State) ->
     io:format("ReklamoHub stopping...~n"),
+    ok = cowboy:stop_listener(http_listener),
+    io:format("ReklamoHub stopped cleanly.~n"),
     ok.

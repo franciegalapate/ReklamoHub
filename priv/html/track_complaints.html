@@ -43,27 +43,7 @@
     </main>
   </div>
 
-  <script>
-    // Dummy demo: Replace with actual API call later DELETE!
-    document.getElementById("trackForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const id = document.getElementById("trackingId").value.trim();
-      const resultDiv = document.getElementById("result");
+  <script src="/javascript/script.js"></script>
 
-      if (!id) {
-        resultDiv.style.display = "block";
-        resultDiv.innerHTML = "<p style='color:red;'>❌ Please enter a tracking ID.</p>";
-        return;
-      }
-
-      // Fake lookup
-      if (id === "CMP-0005") {
-        resultDiv.innerHTML = "<p>✅ Complaint <strong>CMP-0005</strong> is currently <strong>Submitted</strong>.</p>";
-      } else {
-        resultDiv.innerHTML = "<p>⚠️ No record found for <strong>" + id + "</strong>.</p>";
-      }
-      resultDiv.style.display = "block";
-    });
-  </script>
 </body>
 </html>

@@ -16,7 +16,7 @@ init([]) ->
          {db_manager, start, []},
          permanent, 5000, worker, [db_manager]},
 
-    %% --- Cowboy routes ---
+    % --- Cowboy routes ---
     Dispatch = cowboy_router:compile([
         {'_', [
             {"/submit_complaint", complaint_handler, []},
@@ -29,14 +29,15 @@ init([]) ->
         ]}
     ]),
 
-    %% --- Cowboy listener ---
-    CowboyChild =
+    % --- Cowboy listener ---
+     CowboyChild =
         {http_listener,
          {cowboy, start_clear, [
              http_listener,
              [{port, 8080}],
              #{env => #{dispatch => Dispatch}}
          ]},
-         permanent, 5000, worker, dynamic},
+         transient,   %% <--- was permanent; now transient so shutdown is clean
+         5000, worker, dynamic},
 
     {ok, {{one_for_one, 5, 10}, [DbChild, CowboyChild]}}.
