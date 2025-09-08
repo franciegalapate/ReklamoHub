@@ -38,7 +38,7 @@ init(Req0, State) ->
                 false ->
                     Req = cowboy_req:reply(
                         302,
-                        #{<<"location">> => <<"/admin_login.html?error=1">>},
+                        #{<<"location">> => <<"/admin_login?error=1">>},
                         <<>>, Req1),
                     {ok, Req, State}
             end;
@@ -73,16 +73,71 @@ init(Req0, State) ->
                     JsonRows = [maps:from_list(lists:zip(Cols, Row)) || Row <- Rows],
                     Json = jsx:encode(JsonRows),
                     Req = cowboy_req:reply(200,
-                            #{<<"content-type">> => <<"application/json">>},
-                            Json, Req0),
+                        #{<<"content-type">> => <<"application/json">>},
+                        Json, Req0),
                     {ok, Req, State};
-                _ ->
+                {ok, Cols, Rows} ->
+                    JsonRows = [maps:from_list(lists:zip(Cols, Row)) || Row <- Rows],
+                    Json = jsx:encode(JsonRows),
+                    Req = cowboy_req:reply(200,
+                        #{<<"content-type">> => <<"application/json">>},
+                        Json, Req0),
+                    {ok, Req, State};
+                Error ->
+                    io:format("❌ ERROR in /api/complaints: ~p~n", [Error]),
                     Req = cowboy_req:reply(500,
-                            #{<<"content-type">> => <<"application/json">>},
-                            <<"{\"error\":\"Database error\"}">>, Req0),
+                        #{<<"content-type">> => <<"application/json">>},
+                        <<"{\"error\":\"Database error\"}">>, Req0),
                     {ok, Req, State}
             end;
 
+        %% --------- UPDATE STATUS API ----------
+        {<<"POST">>, <<"/update_status">>} ->
+            {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
+            Map = jsx:decode(BodyBin, [return_maps]),
+            ComplaintIDBin = maps:get(<<"complaint_id">>, Map),
+            NewStatus      = maps:get(<<"status">>, Map),
+
+            %% Normalize ID: "CMP-0005" -> 5
+            ComplaintID =
+                case ComplaintIDBin of
+                    <<"CMP-", NumBin/binary>> -> list_to_integer(binary_to_list(NumBin));
+                    NumBin -> list_to_integer(binary_to_list(NumBin))
+                end,
+
+            Sql = "UPDATE complaints SET status = ? WHERE complaint_id = ?",
+            case db_manager:query(Sql, [NewStatus, ComplaintID]) of
+                ok ->
+                    %% Fetch updated row from view (with CMP- prefix)
+                    case reklamohub_db:get_complaint_by_id(ComplaintID) of
+                        {ok, #{columns := Cols, rows := [Row]}} ->
+                            JsonRow = maps:from_list(lists:zip(Cols, Row)),
+                            Json = jsx:encode(JsonRow),
+                            Req = cowboy_req:reply(200,
+                                #{<<"content-type">> => <<"application/json">>},
+                                Json, Req1),
+                            {ok, Req, State};
+                        {ok, Cols, [Row]} ->
+                            JsonRow = maps:from_list(lists:zip(Cols, Row)),
+                            Json = jsx:encode(JsonRow),
+                            Req = cowboy_req:reply(200,
+                                #{<<"content-type">> => <<"application/json">>},
+                                Json, Req1),
+                            {ok, Req, State};
+                        FetchError ->
+                            io:format("❌ ERROR fetching updated complaint: ~p~n", [FetchError]),
+                            Req = cowboy_req:reply(500,
+                                #{<<"content-type">> => <<"application/json">>},
+                                <<"{\"error\":\"Status updated, but could not fetch complaint\"}">>, Req1),
+                            {ok, Req, State}
+                    end;
+                Error ->
+                    io:format("❌ ERROR in update_status query: ~p~n", [Error]),
+                    Req = cowboy_req:reply(500,
+                        #{<<"content-type">> => <<"application/json">>},
+                        <<"{\"error\":\"Failed to update status\"}">>, Req1),
+                    {ok, Req, State}
+            end;
         _ ->
             {ok, Req0, State}
     end.

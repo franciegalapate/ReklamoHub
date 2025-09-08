@@ -12,15 +12,37 @@ const fetchComplaintsFromBackend = async () => {
 };
 
 const updateComplaintStatusInBackend = async (id, newStatus) => {
-    await fetch("/update_status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ complaint_id: id, status: newStatus })
+  try {
+    const res = await fetch("/update_status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ complaint_id: id, status: newStatus })
     });
+
+    const json = await res.json();
+
+    if (res.ok) {
+      // ✅ Update cache with the updated complaint
+      const idx = complaintsCache.findIndex(c => c.complaint_id === id);
+      if (idx !== -1) {
+        complaintsCache[idx] = json;
+      }
+      return json;
+    } else {
+      console.error("Failed to update status:", json.error);
+      alert("❌ " + (json.error || "Could not update status."));
+      return null;
+    }
+  } catch (err) {
+    console.error("Error updating status:", err);
+    alert("⚠️ Network error updating status.");
+    return null;
+  }
 };
 
 // --- DOM Elements ---
 const complaintsTableBody = document.getElementById('complaints-table-body');
+const modalId = document.getElementById('modal-id');
 const logoutBtn = document.getElementById('logout-btn');
 const modalBackdrop = document.getElementById('modal-backdrop');
 const closeModalBtn = document.getElementById('close-modal-btn');
@@ -55,6 +77,7 @@ const renderTable = async () => {
         const tr = document.createElement('tr');
         const statusClass = complaint.status.toLowerCase().replace(/\s/g, '-');
         tr.innerHTML = `
+            <td>${complaint.complaint_id}</td> <!-- ✅ New column -->
             <td>${complaint.resident || 'Anonymous'}</td>
             <td>${complaint.address}</td>
             <td>${complaint.category}</td>
@@ -99,13 +122,26 @@ statusFilter.addEventListener('change', (e) => {
     renderTable();
 });
 
-complaintsTableBody.addEventListener('change', (e) => {
-    if (e.target.classList.contains('status-select')) {
-        const id = e.target.dataset.id;
-        const newStatus = e.target.value;
-        updateComplaintStatusInBackend(id, newStatus);
-        updateStatusColor(e.target);
+complaintsTableBody.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('status-select')) {
+    const id = e.target.dataset.id;
+    const newStatus = e.target.value;
+
+    const updatedComplaint = await updateComplaintStatusInBackend(id, newStatus);
+
+    if (updatedComplaint) {
+      updateStatusColor(e.target);
+
+      // Show confirmation message
+      const msgDiv = document.getElementById("status-message");
+      msgDiv.innerHTML = `<p style="color: green;">✅ Complaint ${updatedComplaint.complaint_id} updated to <strong>${updatedComplaint.status}</strong></p>`;
+
+      // Hide after 3 seconds
+      setTimeout(() => {
+        msgDiv.innerHTML = "";
+      }, 3000);
     }
+  }
 });
 
 complaintsTableBody.addEventListener('click', (e) => {
@@ -114,6 +150,7 @@ complaintsTableBody.addEventListener('click', (e) => {
         const id = e.target.dataset.id;
         const complaint = complaintsCache.find(c => c.complaint_id == id);
         if (complaint) {
+            modalId.textContent = complaint.complaint_id;
             modalName.textContent = complaint.resident || 'Anonymous';
             modalAddress.textContent = complaint.address;
             modalCategory.textContent = complaint.category;
