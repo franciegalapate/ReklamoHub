@@ -6,7 +6,7 @@ init(Req0, State) ->
     Method = cowboy_req:method(Req0),
     Path   = cowboy_req:path(Req0),
     case {Method, Path} of
-        %% --------- LOGIN PAGE ----------
+        % Login page
         {<<"GET">>, <<"/admin_login">>} ->
             case file:read_file("priv/html/admin_login.html") of
                 {ok, Html} ->
@@ -21,7 +21,7 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
-        %% --------- LOGIN SUBMIT ----------
+        % Login submit
         {<<"POST">>, <<"/admin_login">>} ->
             {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
             Params   = cow_qs:parse_qs(BodyBin),
@@ -43,7 +43,7 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
-        %% --------- DASHBOARD HTML ----------
+        % Dashboard
         {<<"GET">>, <<"/admin_dashboard">>} ->
             Cookies = cowboy_req:parse_cookies(Req0),
             case lists:keyfind(<<"admin">>, 1, Cookies) of
@@ -66,7 +66,7 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
-        %% --------- DASHBOARD DATA API ----------
+        % Dashboard API to get all complaints
         {<<"GET">>, <<"/api/complaints">>} ->
             case reklamohub_db:get_all_complaints() of
                 {ok, #{columns := Cols, rows := Rows}} ->
@@ -91,14 +91,14 @@ init(Req0, State) ->
                     {ok, Req, State}
             end;
 
-        %% --------- UPDATE STATUS API ----------
+        % Update complaint status API
         {<<"POST">>, <<"/update_status">>} ->
             {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
             Map = jsx:decode(BodyBin, [return_maps]),
             ComplaintIDBin = maps:get(<<"complaint_id">>, Map),
             NewStatus      = maps:get(<<"status">>, Map),
 
-            %% Normalize ID: "CMP-0005" -> 5
+            % "CMP-0005" -> 5
             ComplaintID =
                 case ComplaintIDBin of
                     <<"CMP-", NumBin/binary>> -> list_to_integer(binary_to_list(NumBin));
@@ -108,12 +108,12 @@ init(Req0, State) ->
             Sql = "UPDATE complaints SET status = ? WHERE complaint_id = ?",
             case db_manager:query(Sql, [NewStatus, ComplaintID]) of
                 ok ->
-                    %% Fetch updated row from view (with CMP- prefix)
+                    % Fetch updated row from view (with CMP- prefix)
                     case reklamohub_db:get_complaint_by_id(ComplaintID) of
                         {ok, #{columns := Cols, rows := [Row]}} ->
                             JsonRow = maps:from_list(lists:zip(Cols, Row)),
 
-                            %% ✅ Call dashboard_manager to broadcast the status update
+                            % Call dashboard_manager to broadcast the status update
                             dashboard_manager:status_update(JsonRow),
 
                             Json = jsx:encode(JsonRow),
@@ -124,7 +124,7 @@ init(Req0, State) ->
                         {ok, Cols, [Row]} ->
                             JsonRow = maps:from_list(lists:zip(Cols, Row)),
 
-                            %% ✅ Call dashboard_manager to broadcast the status update
+                    
                             dashboard_manager:status_update(JsonRow),
 
                             Json = jsx:encode(JsonRow),
@@ -150,7 +150,7 @@ init(Req0, State) ->
             {ok, Req0, State}
     end.
 
-%% ---------- Helpers ----------
+% Helper to get value from parsed query string
 
 qs(Key, Params) ->
     case lists:keyfind(Key, 1, Params) of

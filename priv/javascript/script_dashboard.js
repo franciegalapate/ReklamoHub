@@ -1,4 +1,4 @@
-// --- API CALLS ---
+// API calls
 
 const fetchComplaintsFromBackend = async () => {
     try {
@@ -22,7 +22,7 @@ const updateComplaintStatusInBackend = async (id, newStatus) => {
     const json = await res.json();
 
     if (res.ok) {
-      // ✅ Update cache with the updated complaint
+      // Update cache with the updated complaint
       const idx = complaintsCache.findIndex(c => c.complaint_id === id);
       if (idx !== -1) {
         complaintsCache[idx] = json;
@@ -40,7 +40,7 @@ const updateComplaintStatusInBackend = async (id, newStatus) => {
   }
 };
 
-// --- DOM Elements ---
+// DOM Elements
 const complaintsTableBody = document.getElementById('complaints-table-body');
 const modalId = document.getElementById('modal-id');
 const logoutBtn = document.getElementById('logout-btn');
@@ -99,7 +99,7 @@ function renderComplaints(complaints) {
   });
 }
 
-// --- Dashboard Rendering ---
+// Dashboard rendering
 const renderTable = async () => {
     complaintsCache = await fetchComplaintsFromBackend();
     complaintsTableBody.innerHTML = '';
@@ -143,7 +143,7 @@ const renderTable = async () => {
     });
 };
 
-// --- Helpers ---
+// Helpers
 const updateStatusColor = (selectElement) => {
     const newStatus = selectElement.value;
     selectElement.classList.remove(
@@ -156,7 +156,7 @@ const updateStatusColor = (selectElement) => {
     selectElement.classList.add(`status-${statusClass}`);
 };
 
-// --- Event Listeners ---
+// Event Listeners
 document.addEventListener('DOMContentLoaded', renderTable);
 
 statusFilter.addEventListener('change', (e) => {
@@ -226,7 +226,7 @@ logoutBtn.addEventListener('click', () => {
     window.location.href = "/admin_login";
 });
 
-    // --- WebSocket for live complaints ---
+    // WebSocket for live complaints
     const ws = new WebSocket("ws://" + window.location.host + "/ws/complaints");
 
     // Set up a ping to keep the connection alive

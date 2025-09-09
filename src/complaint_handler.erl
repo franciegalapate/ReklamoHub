@@ -23,33 +23,39 @@ init(Req0, State) ->
 
 % Submit a new complaint
 handle_submit(Req0, State) ->
+    io:format("Handling submitted complaint... ~p~n", [self()]),
     {ok, Body, Req1} = cowboy_req:read_body(Req0),
     Map = jsx:decode(Body, [return_maps]),
 
+    % Extract fields
     Resident = maps:get(<<"resident">>, Map, null),
     Category = maps:get(<<"category">>, Map),
     Address  = maps:get(<<"address">>, Map),
     Details  = maps:get(<<"details">>, Map),
     Img      = maps:get(<<"img">>, Map, null),
 
+    % Crash trigger for demo
+    case Details of
+        <<"CRASH">> ->
+            io:format("Submitted complaint has crashed ~p~n", [self()]),
+            erlang:error(simulated_crash);
+        _ ->
+            ok
+    end,
+
+    % Save complaint to DB
     case reklamohub_db:save_complaint(Resident, Category, Address, Details, Img) of
         {ok, #{last_insert_id := ID}} ->
-            %% Fetch the full complaint row using same DB logic as tracking
+            %% Fetch full complaint row
             case reklamohub_db:get_complaint_by_id(ID) of
                 {ok, #{columns := Cols, rows := [Row]}} ->
                     Complaint = normalize_complaint(maps:from_list(lists:zip(Cols, Row))),
-
-                    %%Notify dashboard_manager
                     dashboard_manager:new_complaint(Complaint),
-
                     reply_with_complaint(Cols, Row, Req1, State);
 
                 {ok, Cols, [Row]} ->
                     Complaint = normalize_complaint(maps:from_list(lists:zip(Cols, Row))),
-
-                    %% Notify dashboard_manager
                     dashboard_manager:new_complaint(Complaint),
-
                     reply_with_complaint(Cols, Row, Req1, State);
 
                 FetchError ->
@@ -70,18 +76,19 @@ handle_submit(Req0, State) ->
 
 % Track complaint by ID
 handle_track(Req0, State) ->
+    io:format("Fetching complaint... ~p~n", [self()]),
     Qs = cowboy_req:parse_qs(Req0),
     ComplaintIDStr = proplists:get_value(<<"id">>, Qs),
     Req1 = Req0,
 
-    %% Normalize input: allow "CMP-0026" or "26"
+    % Normalize input: allows "CMP-0026" or "26"
     ComplaintID =
-        case ComplaintIDStr of
-            <<"CMP-", NumBin/binary>> ->
-                list_to_integer(binary_to_list(NumBin));
-            NumBin ->
-                list_to_integer(binary_to_list(NumBin))
-        end,
+    case string:to_upper(binary_to_list(ComplaintIDStr)) of
+        "CMP-" ++ Digits ->
+            list_to_integer(Digits);
+        Digits ->
+            list_to_integer(Digits)
+    end,
 
     case reklamohub_db:get_complaint_by_id(ComplaintID) of
         {ok, #{rows := []}} ->
@@ -103,7 +110,7 @@ handle_track(Req0, State) ->
             {ok, Req, State}
     end.
 
-%% Helper to standardize the complaint response
+% Helper to standardize the complaint response
 reply_with_complaint(Cols, Row, Req, State) ->
     Obj0 = maps:from_list(lists:zip(Cols, Row)),
     Obj  = normalize_complaint(Obj0),
