@@ -84,7 +84,7 @@ function renderComplaints(complaints) {
       <td>${complaint.address}</td>
       <td>${complaint.category}</td>
       <td>${complaint.details.substring(0, 50)}...</td>
-      <td>${complaint.img ? `<img src="${complaint.img}" alt="Photo" class="photo-thumbnail">` : '—'}</td>
+      <td>${complaint.img ? `<img src="/uploads/${complaint.img}" alt="Photo" class="photo-thumbnail">` : '—'}</td>
       <td>
         <select class="status-select status-${statusClass}" data-id="${complaint.complaint_id}">
           <option value="submitted" ${complaint.status === 'submitted' ? 'selected' : ''}>Submitted</option>
@@ -125,7 +125,7 @@ const renderTable = async () => {
             <td>${complaint.category}</td>
             <td>${complaint.details.substring(0, 50)}...</td>
             <td>
-                ${complaint.img ? `<img src="${complaint.img}" alt="Photo" class="photo-thumbnail">` : '—'}
+                ${complaint.img ? `<img src="/uploads/${complaint.img}" alt="Photo" class="photo-thumbnail">` : '—'}
             </td>
             <td>
                 <select class="status-select status-${statusClass}" data-id="${complaint.complaint_id}">
@@ -199,7 +199,7 @@ complaintsTableBody.addEventListener('click', (e) => {
             modalDescription.textContent = complaint.details;
 
             if (complaint.img) {
-                modalPhoto.src = complaint.img;
+                modalPhoto.src = `/uploads/${complaint.img}`;
                 modalPhoto.alt = 'Complaint photo';
                 modalPhotoContainer.style.display = 'block';
             } else {

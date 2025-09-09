@@ -9,27 +9,34 @@ if (window.location.pathname === "/" || window.location.pathname === "/index.htm
       const submitBtn = form.querySelector("button[type=submit]");
       submitBtn.disabled = false;
 
-      const data = {
-        resident: document.getElementById("anonymous").checked
-          ? null
-          : document.getElementById("name").value,
-        address: document.getElementById("address1").value,
-        category: document.getElementById("category").value,
-        details: document.getElementById("details").value,
-        img: document.getElementById("photo").files[0]?.name || null
-      };
+      // Create FormData for file upload
+      const formData = new FormData();
+      
+      // Add form fields
+      formData.append("resident", document.getElementById("anonymous").checked
+        ? ""
+        : document.getElementById("name").value);
+      formData.append("address", document.getElementById("address1").value);
+      formData.append("category", document.getElementById("category").value);
+      formData.append("details", document.getElementById("details").value);
+      
+      // Add image file if selected
+      const photoFile = document.getElementById("photo").files[0];
+      if (photoFile) {
+        formData.append("photo", photoFile);
+      }
 
-      const requiredFields = {
-        address: data.address,
-        category: data.category,
-        details: data.details
-      };
+      // Validate required fields
+      const address = formData.get("address");
+      const category = formData.get("category");
+      const details = formData.get("details");
 
-      const missing = Object.keys(requiredFields).filter(
-        (key) => !requiredFields[key]
-      );
-
-      if (missing.length > 0) {
+      if (!address || !category || !details) {
+        const missing = [];
+        if (!address) missing.push("address");
+        if (!category) missing.push("category");
+        if (!details) missing.push("details");
+        
         alert("❌ Please fill in: " + missing.join(", "));
         submitBtn.disabled = false;
         return;
@@ -38,14 +45,18 @@ if (window.location.pathname === "/" || window.location.pathname === "/index.htm
       try {
         const res = await fetch("/submit_complaint", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: formData,
         });
 
         const json = await res.json();
 
         if (res.ok) {
           // Display the full complaint record
+          let imageInfo = '';
+          if (json.img) {
+            imageInfo = `Image: ${json.img}\n`;
+          }
+          
           const msg = `
           ✅ Complaint submitted successfully!
           -------------------------------
@@ -56,6 +67,7 @@ if (window.location.pathname === "/" || window.location.pathname === "/index.htm
           Date: ${json.date}
           Address: ${json.address}
           Details: ${json.details}
+          ${imageInfo}
           `;
 
           alert(msg.trim());
@@ -98,6 +110,11 @@ if (trackForm) {
       const json = await res.json();
 
       if (res.ok) {
+        let imageHtml = '';
+        if (json.img) {
+          imageHtml = `<p>Image: <img src="/uploads/${json.img}" alt="Complaint image" style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; margin-top: 10px;" /></p>`;
+        }
+        
         resultDiv.innerHTML = `
           <p>✅ Complaint <strong>${json.complaint_id}</strong></p>
           <p>Status: <strong>${json.status}</strong></p>
@@ -105,6 +122,7 @@ if (trackForm) {
           <p>Address: ${json.address}</p>
           <p>Details: ${json.details}</p>
           <p>Date: ${json.date}</p>
+          ${imageHtml}
         `;
       } else {
         resultDiv.innerHTML = `<p style='color:red;'>⚠️ ${json.error || "Complaint not found."}</p>`;

@@ -1,7 +1,7 @@
 % DB queries (insert, list, update)
 
 -module(reklamohub_db).
--export([save_complaint/5, get_complaint_by_id/1, get_admin_password/1, get_all_complaints/0 ]).
+-export([save_complaint/5, get_complaint_by_id/1, get_admin_password/1, get_all_complaints/0, update_complaint_image/2]).
 
 % Insert complaint into DB
 save_complaint(Resident, Category, Address, Details, Img) ->
@@ -44,3 +44,16 @@ get_admin_password(Username) ->
 get_all_complaints() ->
     Sql = "SELECT * FROM complaints_view ORDER BY filed_date DESC",
     db_manager:query(Sql).
+
+% Update complaint image filename
+update_complaint_image(ComplaintID, ImageFilename) ->
+    Sql = "UPDATE complaints SET img = ? WHERE complaint_id = ?",
+    case db_manager:query(Sql, [ImageFilename, ComplaintID]) of
+        ok ->
+            ok;
+        {ok, _} ->
+            ok;
+        Error ->
+            io:format("❌ ERROR updating complaint image: ~p~n", [Error]),
+            Error
+    end.

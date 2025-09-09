@@ -22,6 +22,12 @@ init(Req0, State) ->
         <<"/track_complaint">> ->
             complaint_handler:init(Req0, State);
 
+        <<"/upload_image">> ->
+            image_handler:init(Req0, State);
+
+        <<"/uploads/", _/binary>> ->
+            serve_static(Req0, State);
+
         <<"/admin_dashboard">> ->
             {cowboy_websocket, admin_ws_handler, State};
 
@@ -62,6 +68,10 @@ resolve_file(Path) ->
 
         %% Assets (images, logos, etc.)
         [$/,$a,$s,$s,$e,$t,$s,$/ | _] ->
+            "priv" ++ Path;
+
+        %% Uploads
+        [$/,$u,$p,$l,$o,$a,$d,$s,$/ | _] ->
             "priv" ++ Path;
 
         %% Default: decide by extension
