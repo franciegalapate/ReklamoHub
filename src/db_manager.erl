@@ -7,9 +7,8 @@ start() ->
     {ok, _} = application:ensure_all_started(mysql),
     PoolId = db_config:get_pool_id(),
     Config = db_config:get_db_config(),
-    %% Wrap the name properly for gen_server registration:
+    % Wrap the name properly for gen_server registration:
     FixedName = {name, {local, PoolId}},
-    %% (Optional) prefer "" over [] for password in Config
     Options = [FixedName | maps:to_list(Config)],
     case mysql:start_link(Options) of
         {ok, Pid} -> {ok, Pid};

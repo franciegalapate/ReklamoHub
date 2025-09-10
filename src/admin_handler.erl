@@ -23,25 +23,29 @@ init(Req0, State) ->
 
         % Login submit
         {<<"POST">>, <<"/admin_login">>} ->
-            {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
-            Params   = cow_qs:parse_qs(BodyBin),
-            Username = qs(<<"username">>, Params),
-            Password = qs(<<"password">>, Params),
-            case check_login(Username, Password) of
-                true ->
-                    Headers = #{
-                        <<"location">> => <<"/admin_dashboard">>,
-                        <<"set-cookie">> => [<<"admin=1; Path=/; HttpOnly">>]
-                    },
-                    Req = cowboy_req:reply(302, Headers, <<>>, Req1),
-                    {ok, Req, State};
-                false ->
-                    Req = cowboy_req:reply(
-                        302,
-                        #{<<"location">> => <<"/admin_login?error=1">>},
-                        <<>>, Req1),
-                    {ok, Req, State}
-            end;
+        {ok, BodyBin, Req1} = cowboy_req:read_body(Req0),
+        Params   = cow_qs:parse_qs(BodyBin),
+        Username = qs(<<"username">>, Params),
+        Password = qs(<<"password">>, Params),
+        case check_login(Username, Password) of
+            true ->
+                %% ✅ Add log here
+                io:format("✅ Admin ~s logged in at ~p~n", 
+                        [Username, calendar:local_time()]),
+
+                Headers = #{
+                    <<"location">> => <<"/admin_dashboard">>,
+                    <<"set-cookie">> => [<<"admin=1; Path=/; HttpOnly">>]
+                },
+                Req = cowboy_req:reply(302, Headers, <<>>, Req1),
+                {ok, Req, State};
+            false ->
+                Req = cowboy_req:reply(
+                    302,
+                    #{<<"location">> => <<"/admin_login?error=1">>},
+                    <<>>, Req1),
+                {ok, Req, State}
+        end;
 
         % Dashboard
         {<<"GET">>, <<"/admin_dashboard">>} ->
