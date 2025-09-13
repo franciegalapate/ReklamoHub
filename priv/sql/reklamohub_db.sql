@@ -15,8 +15,6 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE IF NOT EXISTS reklamohub_db;
-USE reklamohub_db;
 --
 -- Table structure for table `admin`
 --
@@ -59,7 +57,7 @@ CREATE TABLE `complaints` (
   `address` varchar(255) NOT NULL,
   `details` text NOT NULL,
   PRIMARY KEY (`complaint_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +66,7 @@ CREATE TABLE `complaints` (
 
 LOCK TABLES `complaints` WRITE;
 /*!40000 ALTER TABLE `complaints` DISABLE KEYS */;
-INSERT INTO `complaints` VALUES (1,'Juan Dela Cruz','Garbage','submitted','2025-09-06 08:33:53','uploads/img1.jpg','123 Main St, Barangay Uno','Garbage has not been collected for 3 days.'),(2,'Maria Santos','Noise','in progress','2025-09-06 08:33:53',NULL,'45 Mabini St, Barangay Dos','Loud karaoke every night until 2am.'),(3,'Jose Ramirez','Road Damage','resolved','2025-09-06 08:33:53','uploads/img2.jpg','678 Rizal Ave, Barangay Tres','Huge pothole in front of our house.'),(4,'Ana Lopez','Water Supply','rejected','2025-09-06 08:33:53',NULL,'12 P. Burgos St, Barangay Cuatro','No running water since last week.'),(5,'Pedro Reyes','Streetlight','submitted','2025-09-06 08:33:53',NULL,'89 Del Pilar St, Barangay Cinco','Broken streetlight near the basketball court.'),(6,'Juan Dela Cruz','Garbage','submitted','2025-09-06 08:35:00','uploads/img1.jpg','123 Main St, Barangay Uno','Garbage has not been collected for 3 days.'),(7,'Maria Santos','Noise','in progress','2025-09-06 08:35:00',NULL,'45 Mabini St, Barangay Dos','Loud karaoke every night until 2am.'),(8,'Jose Ramirez','Road Damage','resolved','2025-09-06 08:35:00','uploads/img2.jpg','678 Rizal Ave, Barangay Tres','Huge pothole in front of our house.'),(9,'Ana Lopez','Water Supply','rejected','2025-09-06 08:35:00',NULL,'12 P. Burgos St, Barangay Cuatro','No running water since last week.'),(10,'Pedro Reyes','Streetlight','submitted','2025-09-06 08:35:00',NULL,'89 Del Pilar St, Barangay Cinco','Broken streetlight near the basketball court.');
+INSERT INTO `complaints` VALUES (1,'Juan Dela Cruz','Garbage','in progress','2025-09-06 08:33:53','uploads/img1.jpg','123 Main St, Barangay Uno','Garbage has not been collected for 3 days.'),(2,'Maria Santos','Noise','rejected','2025-09-06 08:33:53',NULL,'45 Mabini St, Barangay Dos','Loud karaoke every night until 2am.'),(3,'Jose Ramirez','Road Damage','submitted','2025-09-06 08:33:53','uploads/img2.jpg','678 Rizal Ave, Barangay Tres','Huge pothole in front of our house.'),(4,'Ana Lopez','Water Supply','rejected','2025-09-06 08:33:53',NULL,'12 P. Burgos St, Barangay Cuatro','No running water since last week.'),(5,'Pedro Reyes','Streetlight','rejected','2025-09-06 08:33:53',NULL,'89 Del Pilar St, Barangay Cinco','Broken streetlight near the basketball court.'),(45,'Lyshael - Phone','Drainage / Flooding','submitted','2025-09-13 01:50:20',NULL,'Lower Quarry','No flood control'),(46,'Francie - iPad','Noise','submitted','2025-09-13 01:50:35',NULL,'Baguio','Too much noise'),(44,'Nicole - PC','Road','submitted','2025-09-13 01:50:20',NULL,'Bakakeng','Too many potholes'),(43,'Andrei Dela Cruz','Garbage','in progress','2025-09-13 01:19:29','CMP-43.jpg','Bakakeng Norte, Baguio City','Garbage pickup schedule isn\'t always one time so there\'s too many garbage lying around.');
 /*!40000 ALTER TABLE `complaints` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -118,4 +116,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-07 12:10:46
+-- Dump completed on 2025-09-13 14:36:10

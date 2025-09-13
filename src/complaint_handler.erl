@@ -184,7 +184,7 @@ rename_file_with_complaint_id(TempFilename, ComplaintID) ->
 process_complaint_with_file(Resident, Category, Address, Details, TempFile, Req1, State) ->
     % Crash trigger for demo
     case Details of
-        <<"CRASH">> ->
+        <<"no water">> ->
             io:format("Submitted complaint has crashed ~p~n", [self()]),
             erlang:error(simulated_crash);
         _ ->
